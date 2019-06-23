@@ -1,0 +1,10 @@
+# Build directory
+/build/
+
+# Scratch files
+/scratch/
+/scratch.*
+
+# Temporary files
+*~
+
