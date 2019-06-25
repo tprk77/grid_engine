@@ -3,10 +3,10 @@
 // Licensed under an MIT style license, see LICENSE.md for details.
 // You are free to copy and modify this code. Happy hacking!
 
-#ifndef GE_GRID_ENGINE_EZ_H_
-#define GE_GRID_ENGINE_EZ_H_
+#ifndef GE_EZ_LOOP_H_
+#define GE_EZ_LOOP_H_
 
-#include "grid_engine/grid_engine.h"
+#include "grid_engine/engine.h"
 
 /**
  * The "EZ" update function type. See `ge_ez_loop` for usage.
@@ -30,4 +30,4 @@ typedef void (*ge_ez_loop_func_t)(size_t width, size_t height, uint8_t* restrict
 int ge_ez_loop(size_t width, size_t height, uint8_t* restrict pixel_arr, void* user_data,
                ge_ez_loop_func_t loop_func);
 
-#endif  // GE_GRID_ENGINE_EZ_H_
+#endif  // GE_EZ_LOOP_H_

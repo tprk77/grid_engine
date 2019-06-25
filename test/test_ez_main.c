@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "grid_engine/grid_engine_ez.h"
+#include "grid_engine/grid_engine.h"
 
 #define WIDTH 100
 #define HEIGHT 50

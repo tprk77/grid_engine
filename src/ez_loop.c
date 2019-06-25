@@ -3,7 +3,7 @@
 // Licensed under an MIT style license, see LICENSE.md for details.
 // You are free to copy and modify this code. Happy hacking!
 
-#include "grid_engine/grid_engine_ez.h"
+#include "grid_engine/ez_loop.h"
 
 #include <stdio.h>
 
