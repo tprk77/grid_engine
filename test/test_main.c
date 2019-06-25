@@ -18,9 +18,9 @@ int main(void)
 
   uint8_t pixel_arr[100][100];
 
-  ge_grid_t* grid = ge_grid_new(100, 100, (uint8_t*) pixel_arr);
+  ge_set_data(100, 100, (uint8_t*) pixel_arr);
 
-  if (ge_grid_window_create(grid) != GE_OK) {
+  if (ge_create_window() != GE_OK) {
     fprintf(stderr, "Cannot create window\n");
     return 1;
   }
@@ -47,7 +47,7 @@ int main(void)
     while (ge_poll_events(&event)) {
       // TODO Handle events?
     }
-    if (ge_grid_window_redraw(grid) != GE_OK) {
+    if (ge_redraw_window() != GE_OK) {
       fprintf(stderr, "Cannot draw window\n");
       return 1;
     }
@@ -57,14 +57,12 @@ int main(void)
     ge_sleep_ms(delay_ms);
   }
 
-  if (ge_grid_window_destroy(grid) != GE_OK) {
+  if (ge_destroy_window() != GE_OK) {
     fprintf(stderr, "Cannot destroy window\n");
     return 1;
   }
 
   fprintf(stderr, "Loop done!\n");
-
-  ge_grid_free(grid);
 
   ge_quit();
 

@@ -8,6 +8,5 @@
 
 #include "grid_engine/engine.h"
 #include "grid_engine/error.h"
-#include "grid_engine/grid.h"
 
 #endif  // GE_GRID_ENGINE_H_
