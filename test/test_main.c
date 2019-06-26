@@ -63,12 +63,12 @@ int main(void)
     ge_sleep_ms(delay_ms);
   }
 
+  fprintf(stderr, "Loop done!\n");
+
   if (ge_destroy_window() != GE_OK) {
     fprintf(stderr, "Cannot destroy window\n");
     return 1;
   }
-
-  fprintf(stderr, "Loop done!\n");
 
   ge_quit();
 

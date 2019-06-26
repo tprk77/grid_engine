@@ -12,6 +12,7 @@ static void abort_on_null(const void* ptr);
 static void putpixel(SDL_Surface* surface, int x, int y, Uint32 pixel);
 
 typedef struct ge_grid {
+  bool inited;
   size_t width;
   size_t height;
   const uint8_t* pixel_arr;
@@ -28,6 +29,7 @@ typedef struct ge_grid {
 }
 
 #define GE_GRID_DEFAULTS_K { \
+    .inited = false, \
     .width = 0, \
     .height = 0, \
     .pixel_arr = NULL, \
@@ -47,23 +49,34 @@ static ge_grid_t ge_grid = GE_GRID_DEFAULTS_K;
 
 ge_error_t ge_init(void)
 {
+  if (ge_grid.inited) {
+    return GE_ERROR_ALREADY_INITED;
+  }
   log_line("Grid engine initializing!\n");
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-    return GE_ERROR_INITIALIZATION;
+    return GE_ERROR_ENGINE_INIT;
   }
   ge_grid = GE_GRID_DEFAULTS;
+  ge_grid.inited = true;
   return GE_OK;
 }
 
 void ge_quit(void)
 {
+  if (!ge_grid.inited) {
+    return;
+  }
   log_line("Grid engine is exiting!\n");
   SDL_Quit();
+  ge_grid.inited = false;
 }
 
 ge_error_t ge_set_data(size_t width, size_t height, const uint8_t* restrict pixel_arr)
 {
   abort_on_null(pixel_arr);
+  if (!ge_grid.inited) {
+    return GE_ERROR_NOT_INITED;
+  }
   ge_grid.width = width;
   ge_grid.height = height;
   ge_grid.pixel_arr = pixel_arr;
@@ -73,13 +86,19 @@ ge_error_t ge_set_data(size_t width, size_t height, const uint8_t* restrict pixe
 ge_error_t ge_set_gfx_opts(const ge_gfx_opts_t* restrict gfx_opts)
 {
   abort_on_null(gfx_opts);
+  if (!ge_grid.inited) {
+    return GE_ERROR_NOT_INITED;
+  }
   ge_grid.gfx_opts = *gfx_opts;
   return GE_OK;
 }
 
 ge_error_t ge_create_window()
 {
-  if (ge_grid.has_window) {
+  if (!ge_grid.inited) {
+    return GE_ERROR_NOT_INITED;
+  }
+  else if (ge_grid.has_window) {
     return GE_ERROR_ALREADY_HAS_WINDOW;
   }
   log_line("Grid engine window being created!\n");
@@ -89,14 +108,26 @@ ge_error_t ge_create_window()
   // TODO More options need to go into the struct, etc
   ge_grid.sdl_window = SDL_CreateWindow(ge_grid.gfx_opts.window_name, 100, 100, window_width,
                                         window_height, SDL_WINDOW_SHOWN);
+  if (ge_grid.sdl_window == NULL) {
+    return GE_ERROR_CREATE_WINDOW;
+  }
   ge_grid.sdl_surface = SDL_GetWindowSurface(ge_grid.sdl_window);
+  if (ge_grid.sdl_surface == NULL) {
+    // Clean up the window we just made
+    SDL_DestroyWindow(ge_grid.sdl_window);
+    ge_grid.sdl_window = NULL;
+    return GE_ERROR_WINDOW_SURFACE;
+  }
   ge_grid.has_window = true;
   return GE_OK;
 }
 
 ge_error_t ge_destroy_window()
 {
-  if (!ge_grid.has_window) {
+  if (!ge_grid.inited) {
+    return GE_ERROR_NOT_INITED;
+  }
+  else if (!ge_grid.has_window) {
     return GE_ERROR_NO_WINDOW;
   }
   log_line("Grid engine window being destroyed!\n");
@@ -109,7 +140,10 @@ ge_error_t ge_destroy_window()
 
 ge_error_t ge_redraw_window()
 {
-  if (!ge_grid.has_window) {
+  if (!ge_grid.inited) {
+    return GE_ERROR_NOT_INITED;
+  }
+  else if (!ge_grid.has_window) {
     return GE_ERROR_NO_WINDOW;
   }
   for (size_t i = 0; i < ge_grid.width; i++) {
@@ -128,12 +162,17 @@ ge_error_t ge_redraw_window()
       }
     }
   }
-  SDL_UpdateWindowSurface(ge_grid.sdl_window);
+  if (SDL_UpdateWindowSurface(ge_grid.sdl_window) != 0) {
+    return GE_ERROR_UPDATE_SURFACE;
+  }
   return GE_OK;
 }
 
 bool ge_poll_events(ge_event_t* restrict event)
 {
+  if (!ge_grid.inited) {
+    return GE_ERROR_NOT_INITED;
+  }
   *event = GE_EVENT_DEFAULTS;
   SDL_Event sdl_event;
   bool got_event = SDL_PollEvent(&sdl_event);
@@ -141,7 +180,7 @@ bool ge_poll_events(ge_event_t* restrict event)
     return false;
   }
   if (sdl_event.type == SDL_QUIT) {
-    log_line("Going to quit!\n");
+    log_line("Grid engine going to quit!\n");
     ge_grid.should_quit = true;
   }
   return false;
