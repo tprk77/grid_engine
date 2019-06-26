@@ -14,11 +14,17 @@ static const uint32_t TARGET_LOOP_MS = 17;
 
 int main(void)
 {
-  ge_init();
+  if (ge_init() != GE_OK) {
+    fprintf(stderr, "Cannot initialize!\n");
+    return 1;
+  }
 
   uint8_t pixel_arr[100][100];
 
-  ge_set_data(100, 100, (uint8_t*) pixel_arr);
+  if (ge_set_data(100, 100, (uint8_t*) pixel_arr) != GE_OK) {
+    fprintf(stderr, "Cannot set grid data!\n");
+    return 1;
+  }
 
   if (ge_create_window() != GE_OK) {
     fprintf(stderr, "Cannot create window\n");

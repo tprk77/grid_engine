@@ -13,9 +13,15 @@ static const uint32_t TARGET_LOOP_MS = 17;
 int ge_ez_loop(const size_t width, const size_t height, uint8_t* const restrict pixel_arr,
                void* const user_data, const ge_ez_loop_func_t loop_func)
 {
-  ge_init();
+  if (ge_init() != GE_OK) {
+    fprintf(stderr, "Cannot initialize!\n");
+    return 1;
+  }
 
-  ge_set_data(width, height, pixel_arr);
+  if (ge_set_data(width, height, pixel_arr) != GE_OK) {
+    fprintf(stderr, "Cannot set grid data!\n");
+    return 1;
+  }
 
   if (ge_create_window() != GE_OK) {
     fprintf(stderr, "Cannot create window\n");

@@ -45,11 +45,14 @@ static const ge_grid_t GE_GRID_DEFAULTS = GE_GRID_DEFAULTS_K;
 
 static ge_grid_t ge_grid = GE_GRID_DEFAULTS_K;
 
-void ge_init(void)
+ge_error_t ge_init(void)
 {
   log_line("Grid engine initializing!\n");
-  SDL_Init(SDL_INIT_VIDEO);
+  if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+    return GE_ERROR_INITIALIZATION;
+  }
   ge_grid = GE_GRID_DEFAULTS;
+  return GE_OK;
 }
 
 void ge_quit(void)
@@ -70,8 +73,7 @@ ge_error_t ge_set_data(size_t width, size_t height, const uint8_t* restrict pixe
 ge_error_t ge_set_gfx_opts(const ge_gfx_opts_t* restrict gfx_opts)
 {
   abort_on_null(gfx_opts);
-  memset(&ge_grid.gfx_opts, 0, sizeof(ge_gfx_opts_t));
-  ge_grid.gfx_opts.pixel_multiplier = gfx_opts->pixel_multiplier;
+  ge_grid.gfx_opts = *gfx_opts;
   return GE_OK;
 }
 

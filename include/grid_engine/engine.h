@@ -39,13 +39,13 @@ typedef struct ge_event {
 
 extern const ge_gfx_opts_t GE_GFX_OPTS_DEFAULTS;
 
-void ge_init(void);
+ge_error_t ge_init(void);
 void ge_quit(void);
 ge_error_t ge_set_data(size_t width, size_t height, const uint8_t* restrict pixel_arr);
 ge_error_t ge_set_gfx_opts(const ge_gfx_opts_t* restrict gfx_opts);
-ge_error_t ge_create_window();
-ge_error_t ge_destroy_window();
-ge_error_t ge_redraw_window();
+ge_error_t ge_create_window(void);
+ge_error_t ge_destroy_window(void);
+ge_error_t ge_redraw_window(void);
 bool ge_poll_events(ge_event_t* restrict event);
 bool ge_should_quit(void);
 uint32_t ge_get_time_ms(void);
