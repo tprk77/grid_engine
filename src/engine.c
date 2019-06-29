@@ -7,7 +7,8 @@
 
 #include "SDL2/SDL.h"
 
-static void log_line(const char* restrict format, ...);
+#include "grid_engine/log.h"
+
 static void abort_on_null(const void* ptr);
 static void putpixel(SDL_Surface* surface, int x, int y, Uint32 pixel);
 
@@ -52,7 +53,7 @@ ge_error_t ge_init(void)
   if (ge_grid.inited) {
     return GE_ERROR_ALREADY_INITED;
   }
-  log_line("Grid engine initializing!\n");
+  GE_LOG_INFO("Grid engine initializing!\n");
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     return GE_ERROR_ENGINE_INIT;
   }
@@ -66,7 +67,7 @@ void ge_quit(void)
   if (!ge_grid.inited) {
     return;
   }
-  log_line("Grid engine is exiting!\n");
+  GE_LOG_INFO("Grid engine is exiting!\n");
   SDL_Quit();
   ge_grid.inited = false;
 }
@@ -101,7 +102,7 @@ ge_error_t ge_create_window()
   else if (ge_grid.has_window) {
     return GE_ERROR_ALREADY_HAS_WINDOW;
   }
-  log_line("Grid engine window being created!\n");
+  GE_LOG_INFO("Grid engine window being created!\n");
   // Find the right window size
   size_t window_width = ge_grid.width * ge_grid.gfx_opts.pixel_multiplier;
   size_t window_height = ge_grid.height * ge_grid.gfx_opts.pixel_multiplier;
@@ -130,7 +131,7 @@ ge_error_t ge_destroy_window()
   else if (!ge_grid.has_window) {
     return GE_ERROR_NO_WINDOW;
   }
-  log_line("Grid engine window being destroyed!\n");
+  GE_LOG_INFO("Grid engine window being destroyed!\n");
   SDL_DestroyWindow(ge_grid.sdl_window);
   ge_grid.sdl_window = NULL;
   ge_grid.sdl_surface = NULL;
@@ -180,7 +181,7 @@ bool ge_poll_events(ge_event_t* restrict event)
     return false;
   }
   if (sdl_event.type == SDL_QUIT) {
-    log_line("Grid engine going to quit!\n");
+    GE_LOG_INFO("Grid engine going to quit!\n");
     ge_grid.should_quit = true;
   }
   return false;
@@ -199,14 +200,6 @@ uint32_t ge_get_time_ms(void)
 void ge_sleep_ms(uint32_t duration_ms)
 {
   SDL_Delay(duration_ms);
-}
-
-static void log_line(const char* restrict format, ...)
-{
-  va_list vlist;
-  va_start(vlist, format);
-  vfprintf(stderr, format, vlist);
-  va_end(vlist);
 }
 
 static void abort_on_null(const void* ptr)

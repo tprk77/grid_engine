@@ -23,7 +23,8 @@ lib:
 	mkdir -p build/tmp
 	gcc $(CFLAGS) $(INCLUDE) -c -o build/tmp/engine.o src/engine.c
 	gcc $(CFLAGS) $(INCLUDE) -c -o build/tmp/ez_loop.o src/ez_loop.c
-	gcc -shared -o $(LIB_OUT) $(LIB_IMPLIB) build/tmp/engine.o build/tmp/ez_loop.o $(LIB_LIBS)
+	gcc $(CFLAGS) $(INCLUDE) -c -o build/tmp/log.o src/log.c
+	gcc -shared -o $(LIB_OUT) $(LIB_IMPLIB) build/tmp/engine.o build/tmp/ez_loop.o build/tmp/log.o $(LIB_LIBS)
 
 tests: lib
 	mkdir -p build/tmp
