@@ -16,17 +16,17 @@ int ge_ez_loop(const size_t width, const size_t height, uint8_t* const restrict 
                void* const user_data, const ge_ez_loop_func_t loop_func)
 {
   if (ge_init() != GE_OK) {
-    GE_LOG_ERROR("Cannot initialize!\n");
+    GE_LOG_ERROR("Cannot initialize!");
     return 1;
   }
 
   if (ge_set_data(width, height, pixel_arr) != GE_OK) {
-    GE_LOG_ERROR("Cannot set grid data!\n");
+    GE_LOG_ERROR("Cannot set grid data!");
     return 1;
   }
 
   if (ge_create_window() != GE_OK) {
-    GE_LOG_ERROR("Cannot create window\n");
+    GE_LOG_ERROR("Cannot create window");
     return 1;
   }
 
@@ -38,7 +38,7 @@ int ge_ez_loop(const size_t width, const size_t height, uint8_t* const restrict 
     }
     loop_func(width, height, pixel_arr, user_data, loop_start_ms);
     if (ge_redraw_window() != GE_OK) {
-      GE_LOG_ERROR("Cannot draw window\n");
+      GE_LOG_ERROR("Cannot draw window");
       return 1;
     }
     const uint32_t loop_end_ms = ge_get_time_ms();
@@ -48,7 +48,7 @@ int ge_ez_loop(const size_t width, const size_t height, uint8_t* const restrict 
   }
 
   if (ge_destroy_window() != GE_OK) {
-    GE_LOG_ERROR("Cannot destroy window\n");
+    GE_LOG_ERROR("Cannot destroy window");
     return 1;
   }
 

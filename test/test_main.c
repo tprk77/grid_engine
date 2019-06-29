@@ -15,24 +15,24 @@ static const uint32_t TARGET_LOOP_MS = 17;
 int main(void)
 {
   if (ge_init() != GE_OK) {
-    GE_LOG_ERROR("Cannot initialize!\n");
+    GE_LOG_ERROR("Cannot initialize!");
     return 1;
   }
 
   uint8_t pixel_arr[100][100];
 
   if (ge_set_data(100, 100, (uint8_t*) pixel_arr) != GE_OK) {
-    GE_LOG_ERROR("Cannot set grid data!\n");
+    GE_LOG_ERROR("Cannot set grid data!");
     return 1;
   }
 
   if (ge_create_window() != GE_OK) {
-    GE_LOG_ERROR("Cannot create window\n");
+    GE_LOG_ERROR("Cannot create window");
     return 1;
   }
 
-  GE_LOG_INFO("Loop started!\n");
-  GE_LOG_DEBUG("Hello, hello!\n");
+  GE_LOG_INFO("Loop started!");
+  GE_LOG_DEBUG("Hello, hello!");
 
   // Copy some random memory
   uint8_t* uninited = malloc(100 * 100);
@@ -55,7 +55,7 @@ int main(void)
       // TODO Handle events?
     }
     if (ge_redraw_window() != GE_OK) {
-      GE_LOG_ERROR("Cannot draw window\n");
+      GE_LOG_ERROR("Cannot draw window");
       return 1;
     }
     const uint32_t loop_end_ms = ge_get_time_ms();
@@ -64,10 +64,10 @@ int main(void)
     ge_sleep_ms(delay_ms);
   }
 
-  GE_LOG_INFO("Loop done!\n");
+  GE_LOG_INFO("Loop done!");
 
   if (ge_destroy_window() != GE_OK) {
-    GE_LOG_ERROR("Cannot destroy window\n");
+    GE_LOG_ERROR("Cannot destroy window");
     return 1;
   }
 
