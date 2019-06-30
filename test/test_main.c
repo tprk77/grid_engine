@@ -9,6 +9,12 @@
 
 #include "grid_engine/grid_engine.h"
 
+// These functions assume a fixed grid size of 100 x 100
+void ushift_columns(uint8_t pixel_arr[100][100], uint8_t pixel_buff[100]);
+void dshift_columns(uint8_t pixel_arr[100][100], uint8_t pixel_buff[100]);
+void lshift_columns(uint8_t pixel_arr[100][100], uint8_t pixel_buff[100]);
+void rshift_columns(uint8_t pixel_arr[100][100], uint8_t pixel_buff[100]);
+
 // Target 60 frames per second: 1000 ms / 60 loops = 17 ms / loop
 static const uint32_t TARGET_LOOP_MS = 17;
 
@@ -20,6 +26,7 @@ int main(void)
   }
 
   uint8_t pixel_arr[100][100];
+  uint8_t pixel_buff[100];
 
   if (ge_set_data(100, 100, (uint8_t*) pixel_arr) != GE_OK) {
     GE_LOG_ERROR("Cannot set grid data!");
@@ -58,6 +65,20 @@ int main(void)
       else if (event.type == GE_EVENT_KEYUP) {
         GE_LOG_INFO("KEYUP: %s", ge_keycode_to_str(event.keydown_data.keycode));
       }
+      if (event.type == GE_EVENT_KEYDOWN) {
+        if (event.keydown_data.keycode == GE_KEYCODE_UP) {
+          ushift_columns(pixel_arr, pixel_buff);
+        }
+        else if (event.keydown_data.keycode == GE_KEYCODE_DOWN) {
+          dshift_columns(pixel_arr, pixel_buff);
+        }
+        else if (event.keydown_data.keycode == GE_KEYCODE_LEFT) {
+          lshift_columns(pixel_arr, pixel_buff);
+        }
+        else if (event.keydown_data.keycode == GE_KEYCODE_RIGHT) {
+          rshift_columns(pixel_arr, pixel_buff);
+        }
+      }
     }
     if (ge_redraw_window() != GE_OK) {
       GE_LOG_ERROR("Cannot draw window");
@@ -79,4 +100,76 @@ int main(void)
   ge_quit();
 
   return 0;
+}
+
+void ushift_columns(uint8_t pixel_arr[100][100], uint8_t pixel_buff[100])
+{
+  // Copy to first row to buffer
+  for (size_t ii = 0; ii < 100; ++ii) {
+    pixel_buff[ii] = pixel_arr[0][ii];
+  }
+  // Copy all rows to the one before
+  for (size_t jj = 1; jj < 100; ++jj) {
+    for (size_t ii = 0; ii < 100; ++ii) {
+      pixel_arr[jj - 1][ii] = pixel_arr[jj][ii];
+    }
+  }
+  // Copy buffer to last row
+  for (size_t ii = 0; ii < 100; ++ii) {
+    pixel_arr[99][ii] = pixel_buff[ii];
+  }
+}
+
+void dshift_columns(uint8_t pixel_arr[100][100], uint8_t pixel_buff[100])
+{
+  // Copy to last row to buffer
+  for (size_t ii = 0; ii < 100; ++ii) {
+    pixel_buff[ii] = pixel_arr[99][ii];
+  }
+  // Copy all rows to the one before
+  for (size_t jj = 1; jj < 100; ++jj) {
+    for (size_t ii = 0; ii < 100; ++ii) {
+      pixel_arr[100 - jj][ii] = pixel_arr[100 - jj - 1][ii];
+    }
+  }
+  // Copy buffer to last row
+  for (size_t ii = 0; ii < 100; ++ii) {
+    pixel_arr[0][ii] = pixel_buff[ii];
+  }
+}
+
+void lshift_columns(uint8_t pixel_arr[100][100], uint8_t pixel_buff[100])
+{
+  // Copy to first column to buffer
+  for (size_t jj = 0; jj < 100; ++jj) {
+    pixel_buff[jj] = pixel_arr[jj][0];
+  }
+  // Copy all columns to the one before
+  for (size_t jj = 0; jj < 100; ++jj) {
+    for (size_t ii = 1; ii < 100; ++ii) {
+      pixel_arr[jj][ii - 1] = pixel_arr[jj][ii];
+    }
+  }
+  // Copy buffer to last column
+  for (size_t jj = 0; jj < 100; ++jj) {
+    pixel_arr[jj][99] = pixel_buff[jj];
+  }
+}
+
+void rshift_columns(uint8_t pixel_arr[100][100], uint8_t pixel_buff[100])
+{
+  // Copy to last column to buffer
+  for (size_t jj = 0; jj < 100; ++jj) {
+    pixel_buff[jj] = pixel_arr[jj][99];
+  }
+  // Copy all columns to the one after
+  for (size_t jj = 0; jj < 100; ++jj) {
+    for (size_t ii = 1; ii < 100; ++ii) {
+      pixel_arr[jj][100 - ii] = pixel_arr[jj][100 - ii - 1];
+    }
+  }
+  // Copy buffer to first column
+  for (size_t jj = 0; jj < 100; ++jj) {
+    pixel_arr[jj][0] = pixel_buff[jj];
+  }
 }
