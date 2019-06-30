@@ -29,10 +29,17 @@ void test_loop_func(size_t width, size_t height, uint8_t* restrict pixel_arr_, v
   }
 }
 
+void test_event_func(const ge_event_t* restrict event, void* restrict user_data, uint32_t time_ms)
+{
+  (void) event;
+  (void) user_data;
+  (void) time_ms;
+}
+
 int main(void)
 {
   // Memory is in row-major order
   uint8_t pixel_arr[HEIGHT][WIDTH];
 
-  return ge_ez_loop(WIDTH, HEIGHT, (uint8_t*) pixel_arr, NULL, test_loop_func);
+  return ge_ez_loop(WIDTH, HEIGHT, (uint8_t*) pixel_arr, NULL, test_loop_func, test_event_func);
 }

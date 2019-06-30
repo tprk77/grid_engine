@@ -13,7 +13,8 @@
 static const uint32_t TARGET_LOOP_MS = 17;
 
 int ge_ez_loop(const size_t width, const size_t height, uint8_t* const restrict pixel_arr,
-               void* const user_data, const ge_ez_loop_func_t loop_func)
+               void* const restrict user_data, const ge_ez_loop_func_t loop_func,
+               const ge_ez_event_func_t event_func)
 {
   if (ge_init() != GE_OK) {
     GE_LOG_ERROR("Cannot initialize!");
@@ -34,9 +35,13 @@ int ge_ez_loop(const size_t width, const size_t height, uint8_t* const restrict 
     const uint32_t loop_start_ms = ge_get_time_ms();
     ge_event_t event;
     while (ge_poll_events(&event)) {
-      // TODO Handle events, once we have those
+      if (event_func != NULL) {
+        event_func(&event, user_data, loop_start_ms);
+      }
     }
-    loop_func(width, height, pixel_arr, user_data, loop_start_ms);
+    if (loop_func != NULL) {
+      loop_func(width, height, pixel_arr, user_data, loop_start_ms);
+    }
     if (ge_redraw_window() != GE_OK) {
       GE_LOG_ERROR("Cannot draw window");
       return 1;
