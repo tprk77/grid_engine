@@ -11,24 +11,13 @@
 #include <stdint.h>
 
 #include "grid_engine/error.h"
+#include "grid_engine/event.h"
 
 // TODO Other graphics options like fullscreen
 typedef struct ge_gfx_opts {
   size_t pixel_multiplier;
   const char* window_name;
 } ge_gfx_opts_t;
-
-// TODO Implement events
-typedef enum ge_event_type {
-  GE_EVENT_NONE = 0,
-  GE_EVENT_KEYDOWN,
-  GE_EVENT_KEYUP,
-} ge_event_type_t;
-
-// TODO Implement events
-typedef struct ge_event {
-  ge_event_type_t type;
-} ge_event_t;
 
 // clang-format off
 #define GE_GFX_OPTS_DEFAULTS_K { \

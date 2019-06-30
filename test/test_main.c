@@ -52,7 +52,12 @@ int main(void)
     const uint32_t loop_start_ms = ge_get_time_ms();
     ge_event_t event;
     while (ge_poll_events(&event)) {
-      // TODO Handle events?
+      if (event.type == GE_EVENT_KEYDOWN) {
+        GE_LOG_INFO("KEYDOWN: %s", ge_keycode_to_str(event.keydown_data.keycode));
+      }
+      else if (event.type == GE_EVENT_KEYUP) {
+        GE_LOG_INFO("KEYUP: %s", ge_keycode_to_str(event.keydown_data.keycode));
+      }
     }
     if (ge_redraw_window() != GE_OK) {
       GE_LOG_ERROR("Cannot draw window");

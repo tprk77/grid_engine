@@ -25,10 +25,6 @@ typedef struct ge_grid {
 } ge_grid_t;
 
 // clang-format off
-#define GE_EVENT_DEFAULTS_K { \
-    .type = GE_EVENT_NONE, \
-}
-
 #define GE_GRID_DEFAULTS_K { \
     .inited = false, \
     .width = 0, \
@@ -43,7 +39,6 @@ typedef struct ge_grid {
 // clang-format on
 
 const ge_gfx_opts_t GE_GFX_OPTS_DEFAULTS = GE_GFX_OPTS_DEFAULTS_K;
-static const ge_event_t GE_EVENT_DEFAULTS = GE_EVENT_DEFAULTS_K;
 static const ge_grid_t GE_GRID_DEFAULTS = GE_GRID_DEFAULTS_K;
 
 static ge_grid_t ge_grid = GE_GRID_DEFAULTS_K;
@@ -172,17 +167,19 @@ ge_error_t ge_redraw_window()
 bool ge_poll_events(ge_event_t* restrict event)
 {
   if (!ge_grid.inited) {
-    return GE_ERROR_NOT_INITED;
-  }
-  *event = GE_EVENT_DEFAULTS;
-  SDL_Event sdl_event;
-  bool got_event = SDL_PollEvent(&sdl_event);
-  if (!got_event) {
     return false;
   }
-  if (sdl_event.type == SDL_QUIT) {
-    GE_LOG_INFO("Grid engine going to quit!");
-    ge_grid.should_quit = true;
+  SDL_Event sdl_event;
+  while (SDL_PollEvent(&sdl_event)) {
+    if (sdl_event.type == SDL_QUIT) {
+      // Handle quiting, but this isn't a GE event
+      GE_LOG_INFO("Grid engine going to quit!");
+      ge_grid.should_quit = true;
+    }
+    else if (ge_fill_event(event, &sdl_event)) {
+      // If this is a GE event, we are done
+      return true;
+    }
   }
   return false;
 }
