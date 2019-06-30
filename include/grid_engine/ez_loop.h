@@ -21,26 +21,37 @@ typedef void (*ge_ez_event_func_t)(const ge_event_t* restrict event, void* restr
                                    uint32_t time_ms);
 
 /**
+ * The data required to run the EZ loop. See `ge_ez_loop` for usage.
+ */
+typedef struct ez_loop_data {
+  size_t width;
+  size_t height;
+  uint8_t* restrict pixel_arr;
+  void* restrict user_data;
+  ge_ez_loop_func_t loop_func;
+  ge_ez_event_func_t event_func;
+} ez_loop_data_t;
+
+/**
  * Run an "EZ" version of the grid engine. You initialize the loop with the
  * width, height, a pointer to the pixel array, and a pointer to the user data.
  * (The user data may be a pointer to anything the user wants, they just need to
- * cast it to a void pointer.)
+ * cast it to a void pointer.) The EZ loop takes care of the rest!
  *
- * The second to last argument, the update function, will be called periodically
- * by the loop. It's responsible for updating the pixel array in whatever way
- * the user sees fit. The update function receives the width, height, pointer to
- * the pixel array, and the pointer to the user data, the same values that were
- * passed to `ge_ez_loop`. Additionally, the update function is also passed the
- * current time step in milliseconds, which can be used in pixel calculations.
+ * The update function will be called periodically by the loop. It's responsible
+ * for updating the pixel array in whatever way the user sees fit. The update
+ * function receives the width, height, pointer to the pixel array, and the
+ * pointer to the user data, the same values that were passed to `ge_ez_loop`.
+ * Additionally, the update function is also passed the current time step in
+ * milliseconds, which can be used in pixel calculations.
  *
- * The last argument, the event handler function, is optional and will be called
- * for each event that occurs. It's responsible for handling and reacting to
- * events in whatever way the user sees fit. Events are things like keypresses,
- * etc, see "event.h" for details. The event handler function receives the
- * pointer to the event, pointer to the user data, and the current time step in
- * milliseconds, just like the update function.
+ * The event handler function, is optional and will be called for each event
+ * that occurs. It's responsible for handling and reacting to events in whatever
+ * way the user sees fit. Events are things like keypresses, etc, see "event.h"
+ * for details. The event handler function receives the pointer to the event,
+ * pointer to the user data, and the current time step in milliseconds, just
+ * like the update function.
  */
-int ge_ez_loop(size_t width, size_t height, uint8_t* restrict pixel_arr, void* restrict user_data,
-               ge_ez_loop_func_t loop_func, ge_ez_event_func_t event_func);
+int ge_ez_loop(const ez_loop_data_t* restrict ez_loop_data);
 
 #endif  // GE_EZ_LOOP_H_

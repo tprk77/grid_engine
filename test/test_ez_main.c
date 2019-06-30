@@ -67,7 +67,15 @@ int main(void)
   uint8_t pixel_arr[HEIGHT][WIDTH];
   // Userdata to track the inverted pixel
   user_data_t user_data = {.x = WIDTH / 2, .y = HEIGHT / 2};
+  // The EZ loop data
+  ez_loop_data_t ez_loop_data = {
+      .width = WIDTH,
+      .height = HEIGHT,
+      .pixel_arr = (uint8_t*) &pixel_arr,
+      .user_data = &user_data,
+      .loop_func = test_loop_func,
+      .event_func = test_event_func,
+  };
   // RUN THE LOOP!
-  return ge_ez_loop(WIDTH, HEIGHT, (uint8_t*) pixel_arr, &user_data, test_loop_func,
-                    test_event_func);
+  return ge_ez_loop(&ez_loop_data);
 }
