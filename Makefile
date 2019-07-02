@@ -21,16 +21,18 @@ all: lib tests
 
 lib:
 	mkdir -p build/tmp
+	gcc $(CFLAGS) $(INCLUDE) -c -o build/tmp/coord.o src/coord.c
 	gcc $(CFLAGS) $(INCLUDE) -c -o build/tmp/engine.o src/engine.c
 	gcc $(CFLAGS) $(INCLUDE) -c -o build/tmp/event.o src/event.c
 	gcc $(CFLAGS) $(INCLUDE) -c -o build/tmp/ez_loop.o src/ez_loop.c
 	gcc $(CFLAGS) $(INCLUDE) -c -o build/tmp/log.o src/log.c
-	gcc -shared -o $(LIB_OUT) $(LIB_IMPLIB) build/tmp/engine.o build/tmp/event.o build/tmp/ez_loop.o build/tmp/log.o $(LIB_LIBS)
+	gcc -shared -o $(LIB_OUT) $(LIB_IMPLIB) build/tmp/coord.o build/tmp/engine.o build/tmp/event.o build/tmp/ez_loop.o build/tmp/log.o $(LIB_LIBS)
 
 tests: lib
 	mkdir -p build/tmp
 	gcc $(CFLAGS) $(INCLUDE) -c -o build/tmp/test_main.o test/test_main.c
 	gcc $(CFLAGS) $(INCLUDE) -c -o build/tmp/test_ez_main.o test/test_ez_main.c
+	gcc $(CFLAGS) $(INCLUDE) -c -o build/tmp/test_conway.o test/test_conway.c
 	gcc $(LDFLAGS) -o build/test build/tmp/test_main.o $(LIBS)
 	gcc $(LDFLAGS) -o build/test_ez build/tmp/test_ez_main.o $(LIBS)
 	if [ -f "/mingw64/bin/SDL2.dll" ]; then cp "/mingw64/bin/SDL2.dll" -t build; fi
