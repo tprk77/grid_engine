@@ -49,8 +49,11 @@ $(LIB_GRID_ENGINE): $(OBJS)
 build/tmp/%.o: test/%.c | build/tmp
 	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
-build/test: build/tmp/test_main.o $(LIB_GRID_ENGINE)
-	$(CC) $(LDFLAGS) $(LIBS) $< -o $@
+build/test: build/tmp/test_main.o $(LIB_GRID_ENGINE) | copy_sdl2_dll
+	$(CC) $(LDFLAGS) $< $(LIBS) -o $@
 
-build/test_ez: build/tmp/test_ez_main.o $(LIB_GRID_ENGINE)
-	$(CC) $(LDFLAGS) $(LIBS) $< -o $@
+build/test_ez: build/tmp/test_ez_main.o $(LIB_GRID_ENGINE) | copy_sdl2_dll
+	$(CC) $(LDFLAGS) $< $(LIBS) -o $@
+
+copy_sdl2_dll:
+	if [ -f "/mingw64/bin/SDL2.dll" ]; then cp "/mingw64/bin/SDL2.dll" -t build; fi
