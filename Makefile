@@ -8,35 +8,47 @@ SDL_LIBS := -lSDL2main -lSDL2
 LIBS :=  -L$(CURDIR)/build  -Wl,-rpath=$(CURDIR)/build -lgrid_engine $(SDL_LIBS)
 
 ifeq ($(OS), Windows_NT)
-    LIB_OUT := build/grid_engine.dll
+    LIB_GRID_ENGINE := build/grid_engine.dll
     LIB_IMPLIB := -Wl,--out-implib,build/libgrid_engine.a
     LIB_LIBS := $(SDL_LIBS)
 else
-    LIB_OUT := build/libgrid_engine.so
+    LIB_GRID_ENGINE := build/libgrid_engine.so
     LIB_IMPLIB :=
     LIB_LIBS :=
 endif
 
-all: lib tests
+SRCS := src/coord.c src/engine.c src/event.c src/ez_loop.c src/grid.c src/log.c
+OBJS := $(patsubst src/%.c,build/tmp/%.o,$(SRCS))
 
-lib:
-	mkdir -p build/tmp
-	gcc $(CFLAGS) $(INCLUDE) -c -o build/tmp/coord.o src/coord.c
-	gcc $(CFLAGS) $(INCLUDE) -c -o build/tmp/engine.o src/engine.c
-	gcc $(CFLAGS) $(INCLUDE) -c -o build/tmp/event.o src/event.c
-	gcc $(CFLAGS) $(INCLUDE) -c -o build/tmp/ez_loop.o src/ez_loop.c
-	gcc $(CFLAGS) $(INCLUDE) -c -o build/tmp/grid.o src/grid.c
-	gcc $(CFLAGS) $(INCLUDE) -c -o build/tmp/log.o src/log.c
-	gcc -shared -o $(LIB_OUT) $(LIB_IMPLIB) build/tmp/coord.o build/tmp/engine.o build/tmp/event.o build/tmp/ez_loop.o build/tmp/grid.o build/tmp/log.o $(LIB_LIBS)
+TESTS := build/test build/test_ez
 
-tests: lib
-	mkdir -p build/tmp
-	gcc $(CFLAGS) $(INCLUDE) -c -o build/tmp/test_main.o test/test_main.c
-	gcc $(CFLAGS) $(INCLUDE) -c -o build/tmp/test_ez_main.o test/test_ez_main.c
-	gcc $(CFLAGS) $(INCLUDE) -c -o build/tmp/test_conway.o test/test_conway.c
-	gcc $(LDFLAGS) -o build/test build/tmp/test_main.o $(LIBS)
-	gcc $(LDFLAGS) -o build/test_ez build/tmp/test_ez_main.o $(LIBS)
-	if [ -f "/mingw64/bin/SDL2.dll" ]; then cp "/mingw64/bin/SDL2.dll" -t build; fi
+all: $(LIB_GRID_ENGINE) $(TESTS)
 
 clean:
 	-rm -rf build
+
+build/tmp:
+	mkdir -p $@
+
+#######################
+# GRID ENGINE LIBRARY #
+#######################
+
+build/tmp/%.o: src/%.c | build/tmp
+	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
+
+$(LIB_GRID_ENGINE): $(OBJS)
+	$(CC) -shared $^ $(LIB_LIBS) $(LIB_IMPLIB) -o $@
+
+#####################
+# GRID ENGINE TESTS #
+#####################
+
+build/tmp/%.o: test/%.c | build/tmp
+	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
+
+build/test: build/tmp/test_main.o $(LIB_GRID_ENGINE)
+	$(CC) $(LDFLAGS) $(LIBS) $< -o $@
+
+build/test_ez: build/tmp/test_ez_main.o $(LIB_GRID_ENGINE)
+	$(CC) $(LDFLAGS) $(LIBS) $< -o $@
