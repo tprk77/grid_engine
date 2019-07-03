@@ -22,7 +22,9 @@ OBJS := $(patsubst src/%.c,build/tmp/%.o,$(SRCS))
 
 TESTS := build/test build/test_ez
 
-all: $(LIB_GRID_ENGINE) $(TESTS)
+all: $(LIB_GRID_ENGINE)
+
+tests: $(LIB_GRID_ENGINE) $(TESTS)
 
 clean:
 	-rm -rf build
