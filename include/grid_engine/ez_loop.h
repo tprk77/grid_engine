@@ -11,22 +11,20 @@
 /**
  * The "EZ" update function type. See `ge_ez_loop` for usage.
  */
-typedef void (*ge_ez_loop_func_t)(size_t width, size_t height, uint8_t* restrict pixel_arr,
-                                  void* restrict user_data, uint32_t time_ms);
+typedef void (*ge_ez_loop_func_t)(ge_grid_t* restrict grid, void* restrict user_data,
+                                  uint32_t time_ms);
 
 /**
  * The "EZ" event handler function type. See `ge_ez_loop` for usage.
  */
-typedef void (*ge_ez_event_func_t)(const ge_event_t* restrict event, void* restrict user_data,
-                                   uint32_t time_ms);
+typedef void (*ge_ez_event_func_t)(ge_grid_t* restrict grid, void* restrict user_data,
+                                   uint32_t time_ms, const ge_event_t* restrict event);
 
 /**
  * The data required to run the EZ loop. See `ge_ez_loop` for usage.
  */
 typedef struct ez_loop_data {
-  size_t width;
-  size_t height;
-  uint8_t* restrict pixel_arr;
+  ge_grid_t* restrict grid;
   void* restrict user_data;
   ge_ez_loop_func_t loop_func;
   ge_ez_event_func_t event_func;
@@ -38,19 +36,19 @@ typedef struct ez_loop_data {
  * (The user data may be a pointer to anything the user wants, they just need to
  * cast it to a void pointer.) The EZ loop takes care of the rest!
  *
- * The update function will be called periodically by the loop. It's responsible
- * for updating the pixel array in whatever way the user sees fit. The update
- * function receives the width, height, pointer to the pixel array, and the
- * pointer to the user data, the same values that were passed to `ge_ez_loop`.
- * Additionally, the update function is also passed the current time step in
- * milliseconds, which can be used in pixel calculations.
+ * The loop function will be called periodically by the loop. It's responsible
+ * for updating the pixel array in whatever way the user sees fit. The loop
+ * function receives the pointer to the grid, the pointer to the user data, and
+ * the current time step in milliseconds. The grid and user data are the same
+ * values that were passed to `ge_ez_loop`. The time step can be used in pixel
+ * calculations, to find a constant rate of change.
  *
- * The event handler function, is optional and will be called for each event
- * that occurs. It's responsible for handling and reacting to events in whatever
- * way the user sees fit. Events are things like keypresses, etc, see "event.h"
- * for details. The event handler function receives the pointer to the event,
- * pointer to the user data, and the current time step in milliseconds, just
- * like the update function.
+ * The event handler function is optional and will be called for each event that
+ * occurs. It's responsible for handling and reacting to events in whatever way
+ * the user sees fit. Events are things like keypresses, etc, see "event.h" for
+ * details. The event handler function receives the pointer to the grid, the
+ * pointer to the user data, and the current time step in milliseconds (just
+ * like the loop function), as well as the pointer to the event.
  */
 int ge_ez_loop(const ez_loop_data_t* restrict ez_loop_data);
 

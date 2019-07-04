@@ -14,9 +14,7 @@ static void putpixel(SDL_Surface* surface, int x, int y, Uint32 pixel);
 
 typedef struct ge_engine {
   bool inited;
-  size_t width;
-  size_t height;
-  const uint8_t* pixel_arr;
+  const ge_grid_t* grid;
   ge_gfx_opts_t gfx_opts;
   bool has_window;
   SDL_Window* sdl_window;
@@ -27,9 +25,7 @@ typedef struct ge_engine {
 // clang-format off
 #define GE_ENGINE_DEFAULTS_K { \
     .inited = false, \
-    .width = 0, \
-    .height = 0, \
-    .pixel_arr = NULL, \
+    .grid = NULL, \
     .gfx_opts = GE_GFX_OPTS_DEFAULTS_K, \
     .has_window = false, \
     .sdl_window = NULL, \
@@ -67,15 +63,13 @@ void ge_quit(void)
   ge_engine.inited = false;
 }
 
-ge_error_t ge_set_data(size_t width, size_t height, const uint8_t* restrict pixel_arr)
+ge_error_t ge_set_grid(const ge_grid_t* restrict grid)
 {
-  abort_on_null(pixel_arr);
+  abort_on_null(grid);
   if (!ge_engine.inited) {
     return GE_ERROR_NOT_INITED;
   }
-  ge_engine.width = width;
-  ge_engine.height = height;
-  ge_engine.pixel_arr = pixel_arr;
+  ge_engine.grid = grid;
   return GE_OK;
 }
 
@@ -99,8 +93,10 @@ ge_error_t ge_create_window()
   }
   GE_LOG_INFO("Grid engine window being created!");
   // Find the right window size
-  size_t window_width = ge_engine.width * ge_engine.gfx_opts.pixel_multiplier;
-  size_t window_height = ge_engine.height * ge_engine.gfx_opts.pixel_multiplier;
+  const size_t width = ge_grid_get_width(ge_engine.grid);
+  const size_t height = ge_grid_get_height(ge_engine.grid);
+  const size_t window_width = width * ge_engine.gfx_opts.pixel_multiplier;
+  const size_t window_height = height * ge_engine.gfx_opts.pixel_multiplier;
   // TODO More options need to go into the struct, etc
   ge_engine.sdl_window = SDL_CreateWindow(ge_engine.gfx_opts.window_name, 100, 100, window_width,
                                           window_height, SDL_WINDOW_SHOWN);
@@ -142,11 +138,14 @@ ge_error_t ge_redraw_window()
   else if (!ge_engine.has_window) {
     return GE_ERROR_NO_WINDOW;
   }
-  for (size_t i = 0; i < ge_engine.width; i++) {
-    for (size_t j = 0; j < ge_engine.height; j++) {
+  const size_t width = ge_grid_get_width(ge_engine.grid);
+  const size_t height = ge_grid_get_height(ge_engine.grid);
+  const uint8_t* const pixel_arr = ge_grid_get_pixel_arr(ge_engine.grid);
+  for (size_t i = 0; i < width; i++) {
+    for (size_t j = 0; j < height; j++) {
       // Compute the color of the grid pixel
-      uint8_t pixel_value = ge_engine.pixel_arr[j * ge_engine.width + i];
-      uint32_t pixel_color =
+      const uint8_t pixel_value = pixel_arr[j * width + i];
+      const uint32_t pixel_color =
           SDL_MapRGBA(ge_engine.sdl_surface->format, pixel_value, pixel_value, pixel_value, 255);
       // Set the actual surface pixels
       const size_t xo = i * ge_engine.gfx_opts.pixel_multiplier;
@@ -206,16 +205,16 @@ static void abort_on_null(const void* ptr)
   }
 }
 
-static void putpixel(SDL_Surface* surface, int x, int y, Uint32 pixel)
+static void putpixel(SDL_Surface* restrict surface, int x, int y, uint32_t pixel)
 {
-  int bpp = surface->format->BytesPerPixel;
-  Uint8* p = (Uint8*) surface->pixels + y * surface->pitch + x * bpp;
+  const int bpp = surface->format->BytesPerPixel;
+  uint8_t* p = (uint8_t*) surface->pixels + y * surface->pitch + x * bpp;
   switch (bpp) {
   case 1:
     *p = pixel;
     break;
   case 2:
-    *(Uint16*) p = pixel;
+    *(uint16_t*) p = pixel;
     break;
   case 3:
     if (SDL_BYTEORDER == SDL_BIG_ENDIAN) {
@@ -230,7 +229,7 @@ static void putpixel(SDL_Surface* surface, int x, int y, Uint32 pixel)
     }
     break;
   case 4:
-    *(Uint32*) p = pixel;
+    *(uint32_t*) p = pixel;
     break;
   }
 }

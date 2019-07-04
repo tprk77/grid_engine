@@ -25,10 +25,11 @@ int main(void)
     return 1;
   }
 
-  uint8_t pixel_arr[100][100];
+  ge_grid_t* grid = ge_grid_create(100, 100);
+  uint8_t(*pixel_arr)[100] = (uint8_t(*)[100]) ge_grid_get_pixel_arr_mut(grid);
   uint8_t pixel_buff[100];
 
-  if (ge_set_data(100, 100, (uint8_t*) pixel_arr) != GE_OK) {
+  if (ge_set_grid(grid) != GE_OK) {
     GE_LOG_ERROR("Cannot set grid data!");
     return 1;
   }
