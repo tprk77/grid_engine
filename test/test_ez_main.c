@@ -9,8 +9,7 @@
 #include "grid_engine/grid_engine.h"
 
 typedef struct user_data {
-  size_t x;
-  size_t y;
+  ge_coord_t coord;
 } user_data_t;
 
 void test_loop_func(ge_grid_t* restrict grid, void* restrict user_data_, uint32_t time_ms)
@@ -31,11 +30,11 @@ void test_loop_func(ge_grid_t* restrict grid, void* restrict user_data_, uint32_
     }
   }
   // Invert the user pixel
-  const size_t user_x = user_data->x;
-  const size_t user_y = user_data->y;
+  const size_t user_x = user_data->coord.x;
+  const size_t user_y = user_data->coord.y;
   const bool user_on = !(((user_x % 2 == 0) ^ (user_y % 2 == 0)) ^ odd_second);
   const uint8_t user_value = (user_on ? 255.0f * (1.0f - (user_x / 100.0f)) : 0);
-  ge_grid_set_coord(grid, (ge_coord_t){user_x, user_y}, user_value);
+  ge_grid_set_coord(grid, user_data->coord, user_value);
 }
 
 void test_event_func(ge_grid_t* restrict grid, void* restrict user_data_, uint32_t time_ms,
@@ -47,21 +46,25 @@ void test_event_func(ge_grid_t* restrict grid, void* restrict user_data_, uint32
   user_data_t* user_data = (user_data_t*) user_data_;
   const size_t width = ge_grid_get_width(grid);
   const size_t height = ge_grid_get_height(grid);
-  // Process arrow key presses to move the user pixel
+  // Process arrow keys to get the direction to move in
+  ge_coord_t offset_dir = {0, 0};
   if (event->type == GE_EVENT_KEYDOWN) {
     if (event->keydown_data.keycode == GE_KEYCODE_UP) {
-      user_data->y = (user_data->y == 0 ? height - 1 : (user_data->y - 1) % height);
+      offset_dir.y = -1;
     }
     else if (event->keydown_data.keycode == GE_KEYCODE_DOWN) {
-      user_data->y = (user_data->y + 1) % height;
+      offset_dir.y = 1;
     }
     else if (event->keydown_data.keycode == GE_KEYCODE_LEFT) {
-      user_data->x = (user_data->x == 0 ? width - 1: (user_data->x - 1) % width);
+      offset_dir.x = -1;
     }
     else if (event->keydown_data.keycode == GE_KEYCODE_RIGHT) {
-      user_data->x = (user_data->x + 1) % width;
+      offset_dir.x = 1;
     }
   }
+  // Actually move the coordinate with wrapping
+  user_data->coord = ge_coord_add(user_data->coord, offset_dir);
+  user_data->coord = ge_coord_wrap(user_data->coord, width, height);
 }
 
 int main(void)
@@ -69,7 +72,7 @@ int main(void)
   // Memory is in row-major order
   ge_grid_t* grid = ge_grid_create(100, 50);
   // User data to track the inverted pixel
-  user_data_t user_data = {.x = 50, .y = 25};
+  user_data_t user_data = {.coord = (ge_coord_t){50, 25}};
   // The EZ loop data
   ez_loop_data_t ez_loop_data = {
       .grid = grid,
