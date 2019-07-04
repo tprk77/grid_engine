@@ -7,6 +7,12 @@
 
 #include <stdlib.h>
 
+typedef struct ge_grid {
+  size_t width;
+  size_t height;
+  uint8_t* restrict pixel_arr;
+} ge_grid_t;
+
 static void abort_on_out_of_bounds(const ge_grid_t* restrict grid, ge_coord_t coord);
 
 static const ge_coord_t GE_NEIGHBOR_OFFSETS[GE_MAX_NUM_NEIGHBORS] = {
@@ -17,6 +23,50 @@ static const ge_neighbor_res_t GE_NEIGHBOR_RES_DEFAULTS = {
     .num_neighbors = 0,
     .neighbors = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}},
 };
+
+ge_grid_t* ge_grid_create(size_t width, size_t height)
+{
+  ge_grid_t* grid = calloc(1, sizeof(ge_grid_t));
+  if (!grid) {
+    return NULL;
+  }
+  grid->width = width;
+  grid->height = height;
+  grid->pixel_arr = calloc(grid->width * grid->height, sizeof(uint8_t));
+  if (!grid->pixel_arr) {
+    free(grid);
+    return NULL;
+  }
+  return grid;
+}
+
+void ge_grid_free(const ge_grid_t* restrict grid)
+{
+  if (grid) {
+    free((void*) grid->pixel_arr);
+    free((void*) grid);
+  }
+}
+
+size_t ge_grid_get_width(const ge_grid_t* restrict grid)
+{
+  return grid->width;
+}
+
+size_t ge_grid_get_height(const ge_grid_t* restrict grid)
+{
+  return grid->height;
+}
+
+const uint8_t* ge_grid_get_pixel_arr(const ge_grid_t* restrict grid)
+{
+  return grid->pixel_arr;
+}
+
+uint8_t* ge_grid_get_pixel_arr_mut(ge_grid_t* restrict grid)
+{
+  return grid->pixel_arr;
+}
 
 bool ge_grid_has_coord(const ge_grid_t* restrict grid, ge_coord_t coord)
 {
