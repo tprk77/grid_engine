@@ -20,11 +20,7 @@ endif
 SRCS := src/coord.c src/engine.c src/event.c src/ez_loop.c src/grid.c src/log.c
 OBJS := $(patsubst src/%.c,build/tmp/%.o,$(SRCS))
 
-TESTS := build/test build/test_ez
-
 all: $(LIB_GRID_ENGINE)
-
-tests: $(LIB_GRID_ENGINE) $(TESTS)
 
 clean:
 	-rm -rf build
@@ -41,19 +37,3 @@ build/tmp/%.o: src/%.c | build/tmp
 
 $(LIB_GRID_ENGINE): $(OBJS)
 	$(CC) -shared $^ $(LIB_LIBS) $(LIB_IMPLIB) -o $@
-
-#####################
-# GRID ENGINE TESTS #
-#####################
-
-build/tmp/%.o: test/%.c | build/tmp
-	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
-
-build/test: build/tmp/test_main.o $(LIB_GRID_ENGINE) | copy_sdl2_dll
-	$(CC) $(LDFLAGS) $< $(LIBS) -o $@
-
-build/test_ez: build/tmp/test_ez_main.o $(LIB_GRID_ENGINE) | copy_sdl2_dll
-	$(CC) $(LDFLAGS) $< $(LIBS) -o $@
-
-copy_sdl2_dll:
-	if [ -f "/mingw64/bin/SDL2.dll" ]; then cp "/mingw64/bin/SDL2.dll" -t build; fi
