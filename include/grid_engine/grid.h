@@ -26,6 +26,8 @@ size_t ge_grid_get_width(const ge_grid_t* restrict grid);
 size_t ge_grid_get_height(const ge_grid_t* restrict grid);
 const uint8_t* ge_grid_get_pixel_arr(const ge_grid_t* restrict grid);
 uint8_t* ge_grid_get_pixel_arr_mut(ge_grid_t* restrict grid);
+void ge_grid_copy_pixel_arr(ge_grid_t* restrict grid, const ge_grid_t* restrict other);
+void ge_grid_clear_pixel_arr(ge_grid_t* restrict grid);
 bool ge_grid_has_coord(const ge_grid_t* restrict grid, ge_coord_t coord);
 uint8_t ge_grid_get_coord(const ge_grid_t* restrict grid, ge_coord_t coord);
 void ge_grid_set_coord(ge_grid_t* restrict grid, ge_coord_t coord, uint8_t value);

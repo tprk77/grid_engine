@@ -6,6 +6,7 @@
 #include "grid_engine/grid.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct ge_grid {
   size_t width;
@@ -66,6 +67,21 @@ const uint8_t* ge_grid_get_pixel_arr(const ge_grid_t* restrict grid)
 uint8_t* ge_grid_get_pixel_arr_mut(ge_grid_t* restrict grid)
 {
   return grid->pixel_arr;
+}
+
+void ge_grid_copy_pixel_arr(ge_grid_t* restrict grid, const ge_grid_t* restrict other)
+{
+  if (grid->width != other->width || grid->height != other->height) {
+    abort();
+  }
+  const size_t size = grid->width * grid->height;
+  memcpy(grid->pixel_arr, other->pixel_arr, size);
+}
+
+void ge_grid_clear_pixel_arr(ge_grid_t* restrict grid)
+{
+  const size_t size = grid->width * grid->height;
+  memset(grid->pixel_arr, 0, size);
 }
 
 bool ge_grid_has_coord(const ge_grid_t* restrict grid, ge_coord_t coord)
