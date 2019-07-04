@@ -70,7 +70,7 @@ uint8_t* ge_grid_get_pixel_arr_mut(ge_grid_t* restrict grid)
 
 bool ge_grid_has_coord(const ge_grid_t* restrict grid, ge_coord_t coord)
 {
-  return (coord.x > 0 && coord.x < (ptrdiff_t) grid->width && coord.y > 0
+  return (coord.x >= 0 && coord.x < (ptrdiff_t) grid->width && coord.y >= 0
           && coord.y < (ptrdiff_t) grid->height);
 }
 
