@@ -141,15 +141,15 @@ ge_error_t ge_redraw_window()
   const size_t width = ge_grid_get_width(ge_engine.grid);
   const size_t height = ge_grid_get_height(ge_engine.grid);
   const uint8_t* const pixel_arr = ge_grid_get_pixel_arr(ge_engine.grid);
-  for (size_t i = 0; i < width; i++) {
-    for (size_t j = 0; j < height; j++) {
+  for (size_t ii = 0; ii < width; ii++) {
+    for (size_t jj = 0; jj < height; jj++) {
       // Compute the color of the grid pixel
-      const uint8_t pixel_value = pixel_arr[j * width + i];
+      const uint8_t pixel_value = pixel_arr[jj * width + ii];
       const uint32_t pixel_color =
           SDL_MapRGBA(ge_engine.sdl_surface->format, pixel_value, pixel_value, pixel_value, 255);
       // Set the actual surface pixels
-      const size_t xo = i * ge_engine.gfx_opts.pixel_multiplier;
-      const size_t yo = j * ge_engine.gfx_opts.pixel_multiplier;
+      const size_t xo = ii * ge_engine.gfx_opts.pixel_multiplier;
+      const size_t yo = jj * ge_engine.gfx_opts.pixel_multiplier;
       for (size_t xd = 0; xd < ge_engine.gfx_opts.pixel_multiplier; ++xd) {
         for (size_t yd = 0; yd < ge_engine.gfx_opts.pixel_multiplier; ++yd) {
           putpixel(ge_engine.sdl_surface, xo + xd, yo + yd, pixel_color);
