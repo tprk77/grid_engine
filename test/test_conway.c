@@ -3,16 +3,32 @@
 // Licensed under an MIT style license, see LICENSE.md for details.
 // You are free to copy and modify this code. Happy hacking!
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "grid_engine/grid_engine.h"
 
 typedef struct user_data {
   size_t last_update_time_s;
   ge_grid_t* temp_grid;
 } user_data_t;
+
+bool gol_cell_live(bool is_live, size_t num_live_neighbors)
+{
+  if (is_live) {
+    if (num_live_neighbors < 2 || num_live_neighbors > 3) {
+      return false;
+    }
+    else {
+      return true;
+    }
+  }
+  else {
+    if (num_live_neighbors == 3) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+}
 
 void conway_loop_func(ge_grid_t* restrict grid, void* restrict user_data_, uint32_t time_ms)
 {
@@ -40,21 +56,11 @@ void conway_loop_func(ge_grid_t* restrict grid, void* restrict user_data_, uint3
         }
       }
       // Apply the Game Of Life rules
-      if (is_live) {
-        if (num_live_neighbors < 2 || num_live_neighbors > 3) {
-          ge_grid_set_coord(user_data->temp_grid, coord, 0);
-        }
-        else {
-          ge_grid_set_coord(user_data->temp_grid, coord, 255);
-        }
+      if (gol_cell_live(is_live, num_live_neighbors)) {
+        ge_grid_set_coord(user_data->temp_grid, coord, 255);
       }
       else {
-        if (num_live_neighbors == 3) {
-          ge_grid_set_coord(user_data->temp_grid, coord, 255);
-        }
-        else {
-          ge_grid_set_coord(user_data->temp_grid, coord, 0);
-        }
+        ge_grid_set_coord(user_data->temp_grid, coord, 0);
       }
     }
   }
@@ -66,12 +72,11 @@ void conway_loop_func(ge_grid_t* restrict grid, void* restrict user_data_, uint3
 int main(void)
 {
   ge_grid_t* grid = ge_grid_create(100, 100);
-  uint8_t(*pixel_arr)[100] = (uint8_t(*)[100]) ge_grid_get_pixel_arr_mut(grid);
   // Make an X pattern
-  for (size_t j = 0; j < 100; ++j) {
-    for (size_t i = 0; i < 100; ++i) {
-      if (i == j || (99 - i) == j) {
-        pixel_arr[j][i] = 255;
+  for (size_t jj = 0; jj < 100; ++jj) {
+    for (size_t ii = 0; ii < 100; ++ii) {
+      if (ii == jj || (99 - ii) == jj) {
+        ge_grid_set_coord(grid, (ge_coord_t){ii, jj}, 255);
       }
     }
   }
