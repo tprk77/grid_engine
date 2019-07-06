@@ -12,6 +12,7 @@
 2. [EZ API](#ez-api)
 3. [Grid API](#grid-api)
 4. [Examples](#examples)
+5. [Building](#building)
 
 
 ## Intro ##
@@ -382,6 +383,82 @@ int main(void)
 The full source is [available here!][test_conway.c]
 
 
+## Building ##
+
+Before we're able to build Grid Engine and it's tests, we need to setup the
+development environment. I've been able to build Grid Engine on Ubuntu and
+Windows using MSYS2 and the MinGW compiler.
+
+**Ubuntu Setup**
+
+The setup in Ubuntu is easy because we can use `apt-get` to install everything:
+
+```
+$ sudo apt-get update
+$ sudo apt-get install build-essential libsdl2-dev
+```
+
+That's it! You're good to go!
+
+**Windows Setup**
+
+Windows is a little bit trickier. There's more than one way to do it. I've had
+good luck using MSYS2 and the MinGW compiler. (I've never tried using
+Microsoft's compilers, the MinGW ones seem better anyway.)
+
+*NOTE: These instructions assume you have a 64 bit CPU.*
+
+1. Go to the [MSYS2 site][msys2] and download the `x86_64` installer.
+2. Run the installer, use `C:\MYS2` as the Installation Folder.
+3. Open the MSYS2 terminal by going to:
+    * `Start` > `Programs` > `MSYS2 64bit` > `MSYS2 MinGW 64-bit`
+4. In the terminal, type the following to update the system:
+
+    ```
+    $ pacman -Syu
+    ```
+
+5. If you get a message to `terminate MSYS2 without returning to shell`, press
+   the `X` in the corner of the window. Open the terminal and run it again:
+
+    ```
+    $ pacman -Syu
+    ```
+
+6. Next install the required tools and dependencies:
+
+    ```
+    $ pacman -S mingw-w64-x86_64-toolchain make mingw-w64-x86_64-SDL2
+    ```
+
+7. If you see `Enter a selection (default=all):` just press enter.
+
+**Running the Build**
+
+Actually running the build is as simple as running `make`. A successful build
+should look something like this:
+
+```
+$ cd grid_engine
+$ make tests
+mkdir -p build/tmp
+cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -Iinclude -c src/coord.c -o build/tmp/coord.o
+cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -Iinclude -c src/engine.c -o build/tmp/engine.o
+cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -Iinclude -c src/event.c -o build/tmp/event.o
+cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -Iinclude -c src/ez_loop.c -o build/tmp/ez_loop.o
+cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -Iinclude -c src/grid.c -o build/tmp/grid.o
+cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -Iinclude -c src/log.c -o build/tmp/log.o
+cc -shared build/tmp/coord.o build/tmp/engine.o build/tmp/event.o build/tmp/ez_loop.o \
+  build/tmp/grid.o build/tmp/log.o   -o build/libgrid_engine.so
+if [ -f "/mingw64/bin/SDL2.dll" ]; then cp "/mingw64/bin/SDL2.dll" -t build; fi
+cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -Iinclude -c test/test_conway.c \
+  -o build/tmp/test_conway.o
+cc -static-libgcc build/tmp/test_conway.o -L/home/tim/grid_engine/build \
+  -Wl,-rpath=/home/tim/grid_engine/build -lgrid_engine -lSDL2main -lSDL2 -o build/test_conway
+rm build/tmp/test_conway.o
+```
+
+
 <!-- REFERENCE -->
 
 [conways_game_of_life]: https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
@@ -389,6 +466,7 @@ The full source is [available here!][test_conway.c]
 [grid.h]: include/grid_engine/grid.h
 [opaque_pointer]: https://en.wikipedia.org/wiki/Opaque_pointer
 [test_conway.c]: test/test_conway.c
+[msys2]: https://www.msys2.org
 
 
 <!-- Local Variables: -->
