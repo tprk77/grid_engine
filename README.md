@@ -6,6 +6,14 @@
 * Learn the C programming language!
 
 
+## Table of Contents ##
+
+1. [Intro](#intro)
+2. [EZ API](#ez-api)
+3. [Grid API](#grid-api)
+4. [Examples](#examples)
+
+
 ## Intro ##
 
 The goal of Grid Engine is to provide a simple and easy to use "engine" to build
