@@ -23,9 +23,7 @@ and opaque `struct` pointers.
 
 ## EZ API ##
 
-```
-int ge_ez_loop(const ez_loop_data_t* ez_loop_data);
-```
+**`int ge_ez_loop(const ez_loop_data_t* ez_loop_data);`**
 
 The [EZ Loop API][ez_loop.h] tries to take care of most of the details of
 running the engine. In particular, the `ge_ez_loop` runs the main loop of the
@@ -68,7 +66,7 @@ is called repeatedly for each loop update of the engine, which usually happens
 at about 60 Hz. The event function is also called repeatedly for each event that
 occurs in the engine. Multiple events can occur per loop update.
 
-### User Data ###
+**User Data**
 
 In C, it's common to supply callbacks with void pointers to user data. The user
 data can be any `struct` pointer the user wants. It's passed alongside the
@@ -114,9 +112,7 @@ void my_loop_func(ge_grid_t* grid, void* user_data, uint32_t time_ms)
 
 ## Grid API ##
 
-```
-typedef struct ge_grid ge_grid_t;
-```
+**`typedef struct ge_grid ge_grid_t;`**
 
 The [Grid API][grid.h] centers around `ge_grid_t`, which is a `struct`
 containing the width, height, and pixel array of a grid. The programmer cannot
@@ -142,10 +138,8 @@ black pixel, while a value of 255 corresponds to a white pixel. Values in
 between 0 and 255 are varying shades of gray. Colors not currently
 supported, sorry!
 
-```
-ge_grid_t* ge_grid_create(size_t width, size_t height);
-void ge_grid_free(const ge_grid_t* grid);
-```
+**`ge_grid_t* ge_grid_create(size_t width, size_t height);`**<br>
+**`void ge_grid_free(const ge_grid_t* grid);`**
 
 These two functions are used to create and free (destroy) grids. When a grid is
 created, a pixel array is automatically allocated for the given width and
@@ -155,19 +149,15 @@ freed later to avoid memory leaks.
 When a grid is no longer needed, it should be freed. Freeing the grid also
 automatically frees the pixel array.
 
-```
-size_t ge_grid_get_width(const ge_grid_t* grid);
-size_t ge_grid_get_height(const ge_grid_t* grid);
-```
+**`size_t ge_grid_get_width(const ge_grid_t* grid);`**<br>
+**`size_t ge_grid_get_height(const ge_grid_t* grid);`**
 
 These two functions return the width and height of the grid, respectively. Note
 that the width and height are not modifiable; you are not allowed to change the
 size of a grid after creation.
 
-```
-const uint8_t* ge_grid_get_pixel_arr(const ge_grid_t* grid);
-uint8_t* ge_grid_get_pixel_arr_mut(ge_grid_t* grid);
-```
+**`const uint8_t* ge_grid_get_pixel_arr(const ge_grid_t* grid);`**<br>
+**`uint8_t* ge_grid_get_pixel_arr_mut(ge_grid_t* grid);`**
 
 These functions return a pointer to the pixel array data. The first function
 returns a pointer to `const`, which means the data is read-only. The second
@@ -175,28 +165,22 @@ function, ending in `_mut` for mutable, returns a pointer to data that is
 writable. In general, you shouldn't need to use these functions. Prefer to use
 the getters and setters described below.
 
-```
-bool ge_grid_has_coord(const ge_grid_t* grid, ge_coord_t coord);
-```
+**`bool ge_grid_has_coord(const ge_grid_t* grid, ge_coord_t coord);`**
 
 This function is used to test if a coordinate is contained by the grid. It will
 return true if the X component is greater or equal to zero and less than width,
 and the Y component is greater or equal to zero and less than height.
 
-```
-uint8_t ge_grid_get_coord(const ge_grid_t* grid, ge_coord_t coord);
-void ge_grid_set_coord(ge_grid_t* grid, ge_coord_t coord, uint8_t value);
-```
+**`uint8_t ge_grid_get_coord(const ge_grid_t* grid, ge_coord_t coord);`**<br>
+**`void ge_grid_set_coord(ge_grid_t* grid, ge_coord_t coord, uint8_t value);`**
 
 These functions get and set the value of a pixel at a coordinate, respectively.
 The grid must actually contain the coordinate. You can check for this using
 `ge_grid_has_coord` if necessary. If the grid does not contain the coordinate,
 the access will be out-of-bounds and the program will abort.
 
-```
-uint8_t ge_grid_get_coord_wrapped(const ge_grid_t* grid, ge_coord_t offset);
-void ge_grid_set_coord_wrapped(ge_grid_t* grid, ge_coord_t offset, uint8_t value);
-```
+**`uint8_t ge_grid_get_coord_wrapped(const ge_grid_t* grid, ge_coord_t offset);`**<br>
+**`void ge_grid_set_coord_wrapped(ge_grid_t* grid, ge_coord_t offset, uint8_t value);`**
 
 These functions get and set the value of a pixel at a wrapped coordinate,
 respectively. They are similar to the above functions, but the grid DOES NOT
@@ -209,10 +193,8 @@ coordinate goes off the left edge, it wraps back to the right edge, and vice
 versa. Coordinates can be arbitrarily large or small, wrapping will always bring
 them back within the grid, even if it would require multiple wraps.
 
-```
-void ge_grid_copy_pixel_arr(ge_grid_t* grid, const ge_grid_t* other);
-void ge_grid_clear_pixel_arr(ge_grid_t* grid);
-```
+**`void ge_grid_copy_pixel_arr(ge_grid_t* grid, const ge_grid_t* other);`**<br>
+**`void ge_grid_clear_pixel_arr(ge_grid_t* grid);`**
 
 The fist function can be used to copy the pixel array of one grid to another.
 The grids must have exactly the same width and height, or else an out-of-bounds
@@ -220,14 +202,14 @@ access will occur and the program will abort.
 
 The second function simply clears the grid by setting all pixels to zero.
 
+**`ge_neighbor_res_t ge_grid_get_neighbors(const ge_grid_t* grid, ge_coord_t coord);`**<br>
+**`ge_neighbor_res_t ge_grid_get_neighbors_wrapped(const ge_grid_t* grid, ge_coord_t coord);`**
+
 ```
 typedef struct ge_neighbor_res {
   size_t num_neighbors;
   ge_coord_t neighbors[GE_MAX_NUM_NEIGHBORS];
 } ge_neighbor_res_t;
-
-ge_neighbor_res_t ge_grid_get_neighbors(const ge_grid_t* grid, ge_coord_t coord);
-ge_neighbor_res_t ge_grid_get_neighbors_wrapped(const ge_grid_t* grid, ge_coord_t coord);
 ```
 
 These functions return the coordinates of the neighbors of a pixel. The
