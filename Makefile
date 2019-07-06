@@ -1,5 +1,8 @@
 # Copyright (c) 2019 Tim Perkins
 
+SHELL = /bin/sh
+.SUFFIXES:
+
 DEBUG := -O0 -g
 CFLAGS := -std=c11 -Wall -Wextra -Werror -fPIC $(DEBUG)
 INCLUDE := -Iinclude
