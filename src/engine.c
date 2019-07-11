@@ -122,6 +122,9 @@ ge_error_t ge_create_window()
   else if (ge_engine.has_window) {
     return GE_ERROR_ALREADY_HAS_WINDOW;
   }
+  else if (!ge_engine.grid) {
+    return GE_ERROR_NO_GRID_SET;
+  }
   GE_LOG_INFO("Grid engine window being created!");
   // Find the right window size
   const size_t width = ge_grid_get_width(ge_engine.grid);
