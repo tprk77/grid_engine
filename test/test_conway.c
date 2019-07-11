@@ -71,11 +71,13 @@ void conway_loop_func(ge_grid_t* restrict grid, void* restrict user_data_, uint3
 
 int main(void)
 {
-  ge_grid_t* grid = ge_grid_create(100, 100);
+  const size_t width = 100;
+  const size_t height = 100;
+  ge_grid_t* grid = ge_grid_create(width, height);
   // Make an X pattern
-  for (size_t jj = 0; jj < 100; ++jj) {
-    for (size_t ii = 0; ii < 100; ++ii) {
-      if (ii == jj || (99 - ii) == jj) {
+  for (size_t jj = 0; jj < height; ++jj) {
+    for (size_t ii = 0; ii < width; ++ii) {
+      if (ii == jj || (width - 1 - ii) == jj) {
         ge_grid_set_coord(grid, (ge_coord_t){ii, jj}, 255);
       }
     }
@@ -83,7 +85,7 @@ int main(void)
   // User data to track state, etc
   user_data_t user_data = {
       .last_update_time_s = 0,
-      .temp_grid = ge_grid_create(100, 100),
+      .temp_grid = ge_grid_create(width, height),
   };
   // The EZ loop data
   ez_loop_data_t ez_loop_data = {
