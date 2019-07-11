@@ -33,6 +33,7 @@ ge_error_t ge_init(void);
 void ge_quit(void);
 ge_error_t ge_set_grid(const ge_grid_t* restrict grid);
 ge_error_t ge_set_gfx_opts(const ge_gfx_opts_t* restrict gfx_opts);
+size_t ge_auto_detect_pixel_multiplier(void);
 ge_error_t ge_create_window(void);
 ge_error_t ge_destroy_window(void);
 ge_error_t ge_redraw_window(void);

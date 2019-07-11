@@ -37,6 +37,9 @@ typedef struct ge_engine {
 const ge_gfx_opts_t GE_GFX_OPTS_DEFAULTS = GE_GFX_OPTS_DEFAULTS_K;
 static const ge_engine_t GE_ENGINE_DEFAULTS = GE_ENGINE_DEFAULTS_K;
 
+// TODO Calculating this from a ratio might be better?
+static const size_t GE_SCREEN_BORDER = 100;
+
 static ge_engine_t ge_engine = GE_ENGINE_DEFAULTS_K;
 
 ge_error_t ge_init(void)
@@ -83,6 +86,34 @@ ge_error_t ge_set_gfx_opts(const ge_gfx_opts_t* restrict gfx_opts)
   return GE_OK;
 }
 
+size_t ge_auto_detect_pixel_multiplier(void)
+{
+  const size_t FALLBACK_PIXEL_MULTIPLIER = 1;
+  if (!ge_engine.inited) {
+    // GE_ERROR_NOT_INITED
+    return FALLBACK_PIXEL_MULTIPLIER;
+  }
+  else if (!ge_engine.grid) {
+    // GE_ERROR_NO_GRID_SET
+    return FALLBACK_PIXEL_MULTIPLIER;
+  }
+  SDL_Rect disp_rect;
+  if (SDL_GetDisplayBounds(0, &disp_rect) != 0) {
+    return FALLBACK_PIXEL_MULTIPLIER;
+  }
+  // Check minimum screen size
+  if ((size_t) disp_rect.w < 3 * GE_SCREEN_BORDER || (size_t) disp_rect.h < 3 * GE_SCREEN_BORDER) {
+    return FALLBACK_PIXEL_MULTIPLIER;
+  }
+  // Essentially the size of the screen divided by the number of grid pixels
+  const size_t grid_width = ge_grid_get_width(ge_engine.grid);
+  const size_t grid_height = ge_grid_get_height(ge_engine.grid);
+  const size_t width_px_mul = (disp_rect.w - 2 * GE_SCREEN_BORDER) / grid_width;
+  const size_t height_px_mul = (disp_rect.h - 2 * GE_SCREEN_BORDER) / grid_height;
+  const size_t min_px_mul = (width_px_mul < height_px_mul ? width_px_mul : height_px_mul);
+  return (min_px_mul != 0 ? min_px_mul : 1);
+}
+
 ge_error_t ge_create_window()
 {
   if (!ge_engine.inited) {
@@ -97,9 +128,10 @@ ge_error_t ge_create_window()
   const size_t height = ge_grid_get_height(ge_engine.grid);
   const size_t window_width = width * ge_engine.gfx_opts.pixel_multiplier;
   const size_t window_height = height * ge_engine.gfx_opts.pixel_multiplier;
-  // TODO More options need to go into the struct, etc
-  ge_engine.sdl_window = SDL_CreateWindow(ge_engine.gfx_opts.window_name, 100, 100, window_width,
-                                          window_height, SDL_WINDOW_SHOWN);
+  // TODO Check window size with actual desktop size
+  ge_engine.sdl_window =
+      SDL_CreateWindow(ge_engine.gfx_opts.window_name, GE_SCREEN_BORDER, GE_SCREEN_BORDER,
+                       window_width, window_height, SDL_WINDOW_SHOWN);
   if (ge_engine.sdl_window == NULL) {
     return GE_ERROR_CREATE_WINDOW;
   }

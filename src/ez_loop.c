@@ -26,6 +26,12 @@ int ge_ez_loop(const ez_loop_data_t* const restrict ez_loop_data)
     GE_LOG_ERROR("Cannot set grid data");
     return 1;
   }
+  ge_gfx_opts_t gfx_opts = GE_GFX_OPTS_DEFAULTS;
+  gfx_opts.pixel_multiplier = ge_auto_detect_pixel_multiplier();
+  if (ge_set_gfx_opts(&gfx_opts) != GE_OK) {
+    GE_LOG_ERROR("Cannot set graphics options");
+    return 1;
+  }
   if (ge_create_window() != GE_OK) {
     GE_LOG_ERROR("Cannot create window");
     return 1;
