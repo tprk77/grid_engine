@@ -74,14 +74,12 @@ int main(void)
   const size_t width = 100;
   const size_t height = 100;
   ge_grid_t* grid = ge_grid_create(width, height);
-  // Make an X pattern
-  for (size_t jj = 0; jj < height; ++jj) {
-    for (size_t ii = 0; ii < width; ++ii) {
-      if (ii == jj || (width - 1 - ii) == jj) {
-        ge_grid_set_coord(grid, (ge_coord_t){ii, jj}, 255);
-      }
-    }
-  }
+  // Make a glider pattern
+  ge_grid_set_coord(grid, (ge_coord_t){50, 50}, 255);
+  ge_grid_set_coord(grid, (ge_coord_t){50, 51}, 255);
+  ge_grid_set_coord(grid, (ge_coord_t){50, 52}, 255);
+  ge_grid_set_coord(grid, (ge_coord_t){49, 52}, 255);
+  ge_grid_set_coord(grid, (ge_coord_t){48, 51}, 255);
   // User data to track state, etc
   user_data_t user_data = {
       .last_update_time_s = 0,
