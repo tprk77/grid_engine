@@ -1,5 +1,7 @@
 # Grid Engine #
 
+![Grid Image Banner](screenshots/Grid_2.png)
+
 * Build simple cellular automatons!
 * Not quite a game engine, but sort of similar.
 * Simple and easy to use.
@@ -457,6 +459,13 @@ cc -static-libgcc build/tmp/test_conway.o -L/home/tim/grid_engine/build \
   -Wl,-rpath=/home/tim/grid_engine/build -lgrid_engine -lSDL2main -lSDL2 -o build/test_conway
 rm build/tmp/test_conway.o
 ```
+
+
+<br>
+<br>
+<br>
+
+![Grid Image](screenshots/Grid_1.png)
 
 
 <!-- REFERENCE -->
