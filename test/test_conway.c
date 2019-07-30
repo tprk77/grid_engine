@@ -69,17 +69,28 @@ void conway_loop_func(ge_grid_t* restrict grid, void* restrict user_data_, uint3
   ge_grid_clear_pixel_arr(user_data->temp_grid);
 }
 
+void draw_glider(ge_grid_t* restrict grid, ge_coord_t origin_coord)
+{
+  const ge_coord_t glider_offsets[5] = {
+      (ge_coord_t){2, 0}, (ge_coord_t){2, 1}, (ge_coord_t){2, 2},
+      (ge_coord_t){1, 2}, (ge_coord_t){0, 1},
+  };
+  for (size_t ii = 0; ii < 5; ++ii) {
+    ge_grid_set_coord_wrapped(grid, ge_coord_add(origin_coord, glider_offsets[ii]), 255);
+  }
+}
+
 int main(void)
 {
   const size_t width = 100;
   const size_t height = 100;
   ge_grid_t* grid = ge_grid_create(width, height);
   // Make a glider pattern
-  ge_grid_set_coord(grid, (ge_coord_t){50, 50}, 255);
-  ge_grid_set_coord(grid, (ge_coord_t){50, 51}, 255);
-  ge_grid_set_coord(grid, (ge_coord_t){50, 52}, 255);
-  ge_grid_set_coord(grid, (ge_coord_t){49, 52}, 255);
-  ge_grid_set_coord(grid, (ge_coord_t){48, 51}, 255);
+  for (size_t x = 0; x < width; x += 10) {
+    for (size_t y = 0; y < height; y += 10) {
+      draw_glider(grid, (ge_coord_t){x, y});
+    }
+  }
   // User data to track state, etc
   user_data_t user_data = {
       .last_update_time_s = 0,
