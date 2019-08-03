@@ -7,8 +7,8 @@
 #define GE_GRID_ENGINE_H_
 
 #include "grid_engine/engine.h"
-#include "grid_engine/error.h"
 #include "grid_engine/ez_loop.h"
 #include "grid_engine/log.h"
+#include "grid_engine/utils.h"
 
 #endif  // GE_GRID_ENGINE_H_
