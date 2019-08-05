@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "grid_engine/log.h"
+
 typedef struct ge_grid {
   size_t width;
   size_t height;
@@ -140,6 +142,7 @@ ge_neighbor_res_t ge_grid_get_neighbors_wrapped(const ge_grid_t* restrict grid, 
 static void abort_on_out_of_bounds(const ge_grid_t* restrict grid, ge_coord_t coord)
 {
   if (!ge_grid_has_coord(grid, coord)) {
+    GE_LOG_ERROR("Coord is out of bounds! (%li, %li)", coord.x, coord.y);
     abort();
   }
 }

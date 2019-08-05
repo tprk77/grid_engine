@@ -7,7 +7,7 @@
 
 static ptrdiff_t pd_min(ptrdiff_t a, ptrdiff_t b);
 static ptrdiff_t pd_max(ptrdiff_t a, ptrdiff_t b);
-static ptrdiff_t pd_mod(ptrdiff_t a, size_t b);
+static ptrdiff_t pd_mod(ptrdiff_t a, ptrdiff_t b);
 
 ge_coord_t ge_coord_add(ge_coord_t coord, ge_coord_t other)
 {
@@ -57,8 +57,8 @@ static ptrdiff_t pd_max(ptrdiff_t a, ptrdiff_t b)
   return (a > b ? a : b);
 }
 
-static ptrdiff_t pd_mod(ptrdiff_t a, size_t b)
+static ptrdiff_t pd_mod(ptrdiff_t a, ptrdiff_t b)
 {
   // Handle negative numbers, so the result is always positive
-  return (a >= 0 ? a % b : a % -b);
+  return (a >= 0 ? a % b : (b + a % -b) % b);
 }
