@@ -119,12 +119,12 @@ typedef enum ge_keycode {
 typedef struct ge_keydown_event {
   uint32_t timestamp_ms;
   ge_keycode_t keycode;
+  bool is_repeat;
 } ge_keydown_event_t;
 
 typedef struct ge_keyup_event {
   uint32_t timestamp_ms;
   ge_keycode_t keycode;
-  bool is_repeat;
 } ge_keyup_event_t;
 
 typedef struct ge_event {

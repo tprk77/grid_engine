@@ -22,9 +22,9 @@ bool ge_fill_event(ge_event_t* restrict event, void* restrict internal_event)
   // Fill the event for the events we support
   if (sdl_event->type == SDL_KEYDOWN) {
     event->type = GE_EVENT_KEYDOWN;
-    event->keyup_data.timestamp_ms = sdl_event->key.timestamp;
-    event->keyup_data.keycode = sdl_scancode_to_keycode(sdl_event->key.keysym.scancode);
-    event->keyup_data.is_repeat = sdl_event->key.repeat;
+    event->keydown_data.timestamp_ms = sdl_event->key.timestamp;
+    event->keydown_data.keycode = sdl_scancode_to_keycode(sdl_event->key.keysym.scancode);
+    event->keydown_data.is_repeat = sdl_event->key.repeat;
     return true;
   }
   else if (sdl_event->type == SDL_KEYUP) {
