@@ -22,6 +22,12 @@ size_t ge_utils_line_coords(ge_coord_t start_coord, ge_coord_t end_coord,
 bool ge_utils_get_glyph(char glyph, const ge_coord_t** restrict glyph_coords,
                         size_t* restrict glyph_size);
 
+/**
+ * Get an array of glyphs corresponding to a string.
+ */
+size_t ge_utils_str_coords(const char* restrict str, ge_coord_t start_coord,
+                           ge_coord_t* restrict output_coords, size_t max_num_coords);
+
 /*
  * The many, many glyphs:
  */

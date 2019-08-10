@@ -5,6 +5,10 @@
 
 #include "grid_engine/utils.h"
 
+#include <string.h>
+
+#include "grid_engine/log.h"
+
 static ptrdiff_t pd_abs(ptrdiff_t v);
 
 size_t ge_utils_line_coords(ge_coord_t start_coord, ge_coord_t end_coord,
@@ -296,6 +300,32 @@ bool ge_utils_get_glyph(char glyph, const ge_coord_t** restrict glyph_coords,
     break;
   }
   return (*glyph_coords != NULL);
+}
+
+size_t ge_utils_str_coords(const char* restrict str, ge_coord_t start_coord,
+                           ge_coord_t* restrict output_coords, size_t max_num_coords)
+{
+  const char* ch = str;
+  ptrdiff_t x = start_coord.x;
+  const ptrdiff_t y = start_coord.y;
+  size_t num_coords = 0;
+  // Increment x by 9 because glyphs are 8 pixels wide
+  for (; *ch != '\0' && num_coords < max_num_coords; ch++, x += 9) {
+    if (*ch == ' ') {
+      continue;
+    }
+    const ge_coord_t* glyph_coords = NULL;
+    size_t glyph_size = 0;
+    if (!ge_utils_get_glyph(*ch, &glyph_coords, &glyph_size)) {
+      GE_LOG_ERROR("Unknow glyph: %c", *ch);
+      break;
+    }
+    const ge_coord_t glyph_offset = (ge_coord_t){x, y};
+    for (size_t ii = 0; ii < glyph_size && num_coords < max_num_coords; ++ii) {
+      output_coords[num_coords++] = ge_coord_add(glyph_offset, glyph_coords[ii]);
+    }
+  }
+  return num_coords;
 }
 
 static ptrdiff_t pd_abs(ptrdiff_t v)
