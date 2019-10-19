@@ -10,7 +10,8 @@
 #include "grid_engine/log.h"
 
 static void abort_on_null(const void* ptr);
-static void putpixel(SDL_Surface* surface, int x, int y, Uint32 pixel);
+static uint32_t pixel_rbga(uint8_t pixel_value);
+static void destroy_engine_sdl();
 
 typedef struct ge_engine {
   bool inited;
@@ -18,7 +19,8 @@ typedef struct ge_engine {
   ge_gfx_opts_t gfx_opts;
   bool has_window;
   SDL_Window* sdl_window;
-  SDL_Surface* sdl_surface;
+  SDL_Renderer* sdl_renderer;
+  SDL_Texture* sdl_texture;
   bool should_quit;
 } ge_engine_t;
 
@@ -29,7 +31,6 @@ typedef struct ge_engine {
     .gfx_opts = GE_GFX_OPTS_DEFAULTS_K, \
     .has_window = false, \
     .sdl_window = NULL, \
-    .sdl_surface = NULL, \
     .should_quit = false, \
 }
 // clang-format on
@@ -90,11 +91,9 @@ size_t ge_auto_detect_pixel_multiplier(void)
 {
   const size_t FALLBACK_PIXEL_MULTIPLIER = 1;
   if (!ge_engine.inited) {
-    // GE_ERROR_NOT_INITED
     return FALLBACK_PIXEL_MULTIPLIER;
   }
   else if (!ge_engine.grid) {
-    // GE_ERROR_NO_GRID_SET
     return FALLBACK_PIXEL_MULTIPLIER;
   }
   SDL_Rect disp_rect;
@@ -126,25 +125,37 @@ ge_error_t ge_create_window()
     return GE_ERROR_NO_GRID_SET;
   }
   GE_LOG_INFO("Grid engine window being created!");
-  // Find the right window size
   const size_t width = ge_grid_get_width(ge_engine.grid);
   const size_t height = ge_grid_get_height(ge_engine.grid);
   const size_t window_width = width * ge_engine.gfx_opts.pixel_multiplier;
   const size_t window_height = height * ge_engine.gfx_opts.pixel_multiplier;
-  // TODO Check window size with actual desktop size
-  ge_engine.sdl_window =
-      SDL_CreateWindow(ge_engine.gfx_opts.window_name, GE_SCREEN_BORDER, GE_SCREEN_BORDER,
-                       window_width, window_height, SDL_WINDOW_SHOWN);
+  ge_engine.sdl_window = SDL_CreateWindow(ge_engine.gfx_opts.window_name, SDL_WINDOWPOS_CENTERED,
+                                          SDL_WINDOWPOS_CENTERED, window_width, window_height, 0);
   if (ge_engine.sdl_window == NULL) {
     return GE_ERROR_CREATE_WINDOW;
   }
-  ge_engine.sdl_surface = SDL_GetWindowSurface(ge_engine.sdl_window);
-  if (ge_engine.sdl_surface == NULL) {
-    // Clean up the window we just made
-    SDL_DestroyWindow(ge_engine.sdl_window);
-    ge_engine.sdl_window = NULL;
-    return GE_ERROR_WINDOW_SURFACE;
+  ge_engine.sdl_renderer = SDL_CreateRenderer(ge_engine.sdl_window, -1, 0);
+  if (ge_engine.sdl_renderer == NULL) {
+    destroy_engine_sdl();
+    return GE_ERROR_CREATE_WINDOW;
   }
+  if (SDL_RenderSetLogicalSize(ge_engine.sdl_renderer, width, height) != 0) {
+    destroy_engine_sdl();
+    return GE_ERROR_CREATE_WINDOW;
+  }
+  SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+  ge_engine.sdl_texture = SDL_CreateTexture(ge_engine.sdl_renderer, SDL_PIXELFORMAT_RGBA8888,
+                                            SDL_TEXTUREACCESS_STREAMING, width, height);
+  if (ge_engine.sdl_texture == NULL) {
+    destroy_engine_sdl();
+    return GE_ERROR_CREATE_WINDOW;
+  }
+  SDL_SetRenderDrawColor(ge_engine.sdl_renderer, 0, 0, 0, 255);
+  if (SDL_RenderClear(ge_engine.sdl_renderer) != 0) {
+    destroy_engine_sdl();
+    return GE_ERROR_CREATE_WINDOW;
+  }
+  SDL_RenderPresent(ge_engine.sdl_renderer);
   ge_engine.has_window = true;
   return GE_OK;
 }
@@ -158,9 +169,7 @@ ge_error_t ge_destroy_window()
     return GE_ERROR_NO_WINDOW;
   }
   GE_LOG_INFO("Grid engine window being destroyed!");
-  SDL_DestroyWindow(ge_engine.sdl_window);
-  ge_engine.sdl_window = NULL;
-  ge_engine.sdl_surface = NULL;
+  destroy_engine_sdl();
   ge_engine.has_window = false;
   return GE_OK;
 }
@@ -176,25 +185,28 @@ ge_error_t ge_redraw_window()
   const size_t width = ge_grid_get_width(ge_engine.grid);
   const size_t height = ge_grid_get_height(ge_engine.grid);
   const uint8_t* const pixel_arr = ge_grid_get_pixel_arr(ge_engine.grid);
-  for (size_t ii = 0; ii < width; ii++) {
-    for (size_t jj = 0; jj < height; jj++) {
-      // Compute the color of the grid pixel
+  void* tex_pixel_arr_raw = NULL;
+  int tex_pitch_b = 0;
+  if (SDL_LockTexture(ge_engine.sdl_texture, NULL, &tex_pixel_arr_raw, &tex_pitch_b) != 0) {
+    return GE_ERROR_DRAWING;
+  }
+  uint8_t* const tex_pixel_arr = tex_pixel_arr_raw;
+  for (size_t jj = 0; jj < height; jj++) {
+    uint32_t* const tex_pixel_row = (uint32_t*) &tex_pixel_arr[tex_pitch_b * jj];
+    for (size_t ii = 0; ii < width; ii++) {
+      uint32_t* const tex_pixel = &tex_pixel_row[ii];
       const uint8_t pixel_value = pixel_arr[jj * width + ii];
-      const uint32_t pixel_color =
-          SDL_MapRGBA(ge_engine.sdl_surface->format, pixel_value, pixel_value, pixel_value, 255);
-      // Set the actual surface pixels
-      const size_t xo = ii * ge_engine.gfx_opts.pixel_multiplier;
-      const size_t yo = jj * ge_engine.gfx_opts.pixel_multiplier;
-      for (size_t xd = 0; xd < ge_engine.gfx_opts.pixel_multiplier; ++xd) {
-        for (size_t yd = 0; yd < ge_engine.gfx_opts.pixel_multiplier; ++yd) {
-          putpixel(ge_engine.sdl_surface, xo + xd, yo + yd, pixel_color);
-        }
-      }
+      *tex_pixel = pixel_rbga(pixel_value);
     }
   }
-  if (SDL_UpdateWindowSurface(ge_engine.sdl_window) != 0) {
-    return GE_ERROR_UPDATE_SURFACE;
+  SDL_UnlockTexture(ge_engine.sdl_texture);
+  if (SDL_RenderClear(ge_engine.sdl_renderer) != 0) {
+    return GE_ERROR_DRAWING;
   }
+  if (SDL_RenderCopy(ge_engine.sdl_renderer, ge_engine.sdl_texture, NULL, NULL) != 0) {
+    return GE_ERROR_DRAWING;
+  }
+  SDL_RenderPresent(ge_engine.sdl_renderer);
   return GE_OK;
 }
 
@@ -240,31 +252,42 @@ static void abort_on_null(const void* ptr)
   }
 }
 
-static void putpixel(SDL_Surface* restrict surface, int x, int y, uint32_t pixel)
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+#define RGBA_R_SHIFT 24
+#define RGBA_G_SHIFT 16
+#define RGBA_B_SHIFT 8
+#define RGBA_A_SHIFT 0
+#else
+#define RGBA_R_SHIFT 0
+#define RGBA_G_SHIFT 8
+#define RGBA_B_SHIFT 16
+#define RGBA_A_SHIFT 24
+#endif
+
+static uint32_t pixel_rbga(uint8_t pixel_value)
 {
-  const int bpp = surface->format->BytesPerPixel;
-  uint8_t* p = (uint8_t*) surface->pixels + y * surface->pitch + x * bpp;
-  switch (bpp) {
-  case 1:
-    *p = pixel;
-    break;
-  case 2:
-    *(uint16_t*) p = pixel;
-    break;
-  case 3:
-    if (SDL_BYTEORDER == SDL_BIG_ENDIAN) {
-      p[0] = (pixel >> 16) & 0xff;
-      p[1] = (pixel >> 8) & 0xff;
-      p[2] = pixel & 0xff;
-    }
-    else {
-      p[0] = pixel & 0xff;
-      p[1] = (pixel >> 8) & 0xff;
-      p[2] = (pixel >> 16) & 0xff;
-    }
-    break;
-  case 4:
-    *(uint32_t*) p = pixel;
-    break;
+  // Assumes texture format is SDL_PIXELFORMAT_RGBA8888
+  return ((pixel_value << RGBA_R_SHIFT) | (pixel_value << RGBA_G_SHIFT)
+          | (pixel_value << RGBA_B_SHIFT) | (255 << RGBA_A_SHIFT));
+}
+
+#undef RGBA_R_SHIFT
+#undef RGBA_G_SHIFT
+#undef RGBA_B_SHIFT
+#undef RGBA_A_SHIFT
+
+static void destroy_engine_sdl()
+{
+  if (ge_engine.sdl_texture) {
+    SDL_DestroyTexture(ge_engine.sdl_texture);
   }
+  if (ge_engine.sdl_renderer) {
+    SDL_DestroyRenderer(ge_engine.sdl_renderer);
+  }
+  if (ge_engine.sdl_window) {
+    SDL_DestroyWindow(ge_engine.sdl_window);
+  }
+  ge_engine.sdl_texture = NULL;
+  ge_engine.sdl_renderer = NULL;
+  ge_engine.sdl_window = NULL;
 }
