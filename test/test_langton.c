@@ -32,7 +32,7 @@ void langton_loop_func(ge_grid_t* restrict grid, void* restrict user_data_, uint
   const size_t height = ge_grid_get_height(grid);
   // Compute the new grid from the old grid
 
-  printf("(%I64d, %I64d)\n", user_data->ant_coords.x, user_data->ant_coords.y);
+  printf("(%I64ld, %I64ld)\n", user_data->ant_coords.x, user_data->ant_coords.y);
 
   for (size_t jj = 0; jj < height; ++jj) {
     for (size_t ii = 0; ii < width; ++ii) {
