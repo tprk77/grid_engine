@@ -3,7 +3,10 @@
 // Licensed under an MIT style license, see LICENSE.md for details.
 // You are free to copy and modify this code. Happy hacking!
 
+#define __USE_MINGW_ANSI_STDIO 1
+
 #include <stdio.h>
+
 #include "grid_engine/grid_engine.h"
 
 int turn(int, int);
@@ -34,7 +37,7 @@ void langton_loop_func(ge_grid_t* grid, void* user_data_, uint32_t time_ms)
   const size_t height = ge_grid_get_height(grid);
   // Compute the new grid from the old grid
 
-  // printf("(%I64ld, %I64ld)\n", user_data->ant_coords.x, user_data->ant_coords.y);
+  printf("(%zu, %zu)\n", user_data->ant_coords.x, user_data->ant_coords.y);
 
   for (size_t jj = 0; jj < height; ++jj) {
     for (size_t ii = 0; ii < width; ++ii) {
