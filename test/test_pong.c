@@ -470,7 +470,7 @@ void process_ball(ge_grid_t* restrict grid, user_data_t* restrict user_data)
   if (user_data->ball_heading != HEADING_NONE) {
     const ge_coord_t* const ball_moves = HEADING_MOVES[user_data->ball_heading];
     const ge_coord_t ball_move = ball_moves[user_data->ball_move_index];
-    user_data->ball_move_index = ++user_data->ball_move_index % 3;
+    user_data->ball_move_index = (user_data->ball_move_index + 1) % 3;
     user_data->ball_coord = ge_coord_add(user_data->ball_coord, ball_move);
   }
   // Draw the ball
