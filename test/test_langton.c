@@ -32,7 +32,7 @@ void langton_loop_func(ge_grid_t* restrict grid, void* restrict user_data_, uint
   const size_t height = ge_grid_get_height(grid);
   // Compute the new grid from the old grid
 
-  printf("(%I64ld, %I64ld)\n", user_data->ant_coords.x, user_data->ant_coords.y);
+  // printf("(%I64ld, %I64ld)\n", user_data->ant_coords.x, user_data->ant_coords.y);
 
   for (size_t jj = 0; jj < height; ++jj) {
     for (size_t ii = 0; ii < width; ++ii) {
@@ -42,10 +42,10 @@ void langton_loop_func(ge_grid_t* restrict grid, void* restrict user_data_, uint
       // Apply the Langton Ant rules
       if (coord.x == user_data->ant_coords.x && coord.y == user_data->ant_coords.y && !antFound) {
         antFound = 1;
-        printf("Start: %d", user_data->orientation);
+        // printf("Start: %d", user_data->orientation);
         user_data->orientation = turn(user_data->orientation, is_live);
-        printf("End: %d", user_data->orientation);
-        printf("match\n");
+        // printf("End: %d", user_data->orientation);
+        // printf("match\n");
 
         switch (user_data->orientation) {
         case North:
@@ -61,7 +61,7 @@ void langton_loop_func(ge_grid_t* restrict grid, void* restrict user_data_, uint
           user_data->ant_coords.x--;
           break;
         }
-        
+
         if (is_live)
           ge_grid_set_coord(user_data->temp_grid, coord, 0);
         else
@@ -77,7 +77,6 @@ void langton_loop_func(ge_grid_t* restrict grid, void* restrict user_data_, uint
   ge_grid_copy_pixel_arr(grid, user_data->temp_grid);
   ge_grid_clear_pixel_arr(user_data->temp_grid);
 }
-
 
 int turn(int direction, int live)
 {
