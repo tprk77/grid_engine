@@ -7,6 +7,8 @@
 
 #include "SDL2/SDL.h"
 
+#include "grid_engine/log.h"
+
 static void abort_on_null(const void* ptr);
 static ge_keycode_t sdl_scancode_to_keycode(SDL_Scancode scancode);
 
@@ -213,6 +215,7 @@ const char* ge_keycode_to_str(ge_keycode_t keycode)
 static void abort_on_null(const void* ptr)
 {
   if (ptr == NULL) {
+    GE_LOG_ERROR("Null pointer!");
     abort();
   }
 }

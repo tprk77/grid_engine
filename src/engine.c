@@ -248,6 +248,7 @@ void ge_sleep_ms(uint32_t duration_ms)
 static void abort_on_null(const void* ptr)
 {
   if (ptr == NULL) {
+    GE_LOG_ERROR("Null pointer!");
     abort();
   }
 }
