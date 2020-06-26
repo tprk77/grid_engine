@@ -71,13 +71,18 @@ uint8_t* ge_grid_get_pixel_arr_mut(ge_grid_t* grid)
   return grid->pixel_arr;
 }
 
-void ge_grid_copy_pixel_arr(ge_grid_t* grid, const ge_grid_t* other)
+void ge_grid_copy_pixel_arr(ge_grid_t* src_grid, const ge_grid_t* dest_grid)
 {
-  if (grid->width != other->width || grid->height != other->height) {
+  if (src_grid == dest_grid) {
+    GE_LOG_ERROR("Source and destination grids are the same!");
     abort();
   }
-  const size_t size = grid->width * grid->height;
-  memcpy(grid->pixel_arr, other->pixel_arr, size);
+  if (src_grid->width != dest_grid->width || src_grid->height != dest_grid->height) {
+    GE_LOG_ERROR("Source and destination grids are not the same size!");
+    abort();
+  }
+  const size_t size = src_grid->width * src_grid->height;
+  memcpy(src_grid->pixel_arr, dest_grid->pixel_arr, size);
 }
 
 void ge_grid_clear_pixel_arr(ge_grid_t* grid)
