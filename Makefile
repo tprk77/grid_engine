@@ -21,13 +21,13 @@ OBJS := $(patsubst src/%.c,build/tmp/%.o,$(SRCS))
 
 SDL_LIBS := -lSDL2main -lSDL2
 ifeq ($(OS), Windows_NT)
-    LIB_GRID_ENGINE := build/grid_engine.dll
-    LIB_GE_LIBS := $(SDL_LIBS)
-    LIB_GE_IMPLIB := -Wl,--out-implib,build/libgrid_engine.a
+  LIB_GRID_ENGINE := build/grid_engine.dll
+  LIB_GE_LIBS := $(SDL_LIBS)
+  LIB_GE_IMPLIB := -Wl,--out-implib,build/libgrid_engine.a
 else
-    LIB_GRID_ENGINE := build/libgrid_engine.so
-    LIB_GE_LIBS :=
-    LIB_GE_IMPLIB :=
+  LIB_GRID_ENGINE := build/libgrid_engine.so
+  LIB_GE_LIBS :=
+  LIB_GE_IMPLIB :=
 endif
 
 all: $(LIB_GRID_ENGINE)
@@ -63,13 +63,8 @@ copy_sdl2_dll:
 # OTHER #
 #########
 
-BUILD_DEPENDS := libsdl2-dev
-
 clean:
 	-rm -rf build
 
-depends:
-	sudo apt-get install $(BUILD_DEPENDS) # UBUNTU ONLY!
-
 # List of all fake targets
-.PHONY: all tests clean depends copy_sdl2_dll
+.PHONY: all tests copy_sdl2_dll clean
