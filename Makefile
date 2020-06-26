@@ -48,16 +48,22 @@ $(LIB_GRID_ENGINE): $(OBJS)
 TESTS := build/test_conway build/test_pong build/test_langton
 TEST_LIBS := -L$(CURDIR)/build -Wl,-rpath=$(CURDIR)/build -lgrid_engine $(SDL_LIBS)
 
+ifeq ($(OS), Windows_NT)
+  COPY_DLLS := build/SDL2.dll
+else
+  COPY_DLLS :=
+endif
+
 tests: $(LIB_GRID_ENGINE) $(TESTS)
 
 build/tmp/%.o: test/%.c | build/tmp
 	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
-build/test_%: build/tmp/test_%.o $(LIB_GRID_ENGINE) | copy_sdl2_dll
+build/test_%: build/tmp/test_%.o $(LIB_GRID_ENGINE) | $(COPY_DLLS)
 	$(CC) $(LDFLAGS) $< $(TEST_LIBS) -o $@
 
-copy_sdl2_dll:
-	if [ -f "/mingw64/bin/SDL2.dll" ]; then cp "/mingw64/bin/SDL2.dll" -t build; fi
+build/SDL2.dll: /mingw64/bin/SDL2.dll
+	cp $< $@
 
 #########
 # OTHER #
@@ -67,4 +73,4 @@ clean:
 	-rm -rf build
 
 # List of all fake targets
-.PHONY: all tests copy_sdl2_dll clean
+.PHONY: all tests clean
