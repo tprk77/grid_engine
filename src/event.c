@@ -10,7 +10,7 @@
 static void abort_on_null(const void* ptr);
 static ge_keycode_t sdl_scancode_to_keycode(SDL_Scancode scancode);
 
-bool ge_fill_event(ge_event_t* restrict event, void* restrict internal_event)
+bool ge_fill_event(ge_event_t* event, void* internal_event)
 {
   abort_on_null(event);
   abort_on_null(internal_event);

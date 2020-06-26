@@ -5,6 +5,8 @@
 
 #include "grid_engine/grid_engine.h"
 
+#include <stdlib.h>
+
 typedef struct user_data {
   size_t last_update_time_s;
   ge_grid_t* temp_grid;
@@ -30,7 +32,7 @@ bool gol_cell_live(bool is_live, size_t num_live_neighbors)
   }
 }
 
-void conway_loop_func(ge_grid_t* restrict grid, void* restrict user_data_, uint32_t time_ms)
+void conway_loop_func(ge_grid_t* grid, void* user_data_, uint32_t time_ms)
 {
   // Cast the user data back to the right type
   user_data_t* user_data = (user_data_t*) user_data_;
@@ -69,7 +71,7 @@ void conway_loop_func(ge_grid_t* restrict grid, void* restrict user_data_, uint3
   ge_grid_clear_pixel_arr(user_data->temp_grid);
 }
 
-void draw_glider(ge_grid_t* restrict grid, ge_coord_t origin_coord)
+void draw_glider(ge_grid_t* grid, ge_coord_t origin_coord)
 {
   const ge_coord_t glider_offsets[5] = {
       (ge_coord_t){2, 0}, (ge_coord_t){2, 1}, (ge_coord_t){2, 2},
@@ -82,7 +84,7 @@ void draw_glider(ge_grid_t* restrict grid, ge_coord_t origin_coord)
 
 int main(void)
 {
-  const size_t width = 100;
+  const size_t width = 200;
   const size_t height = 100;
   ge_grid_t* grid = ge_grid_create(width, height);
   // Make a glider pattern
@@ -90,6 +92,12 @@ int main(void)
     for (size_t y = 0; y < height; y += 10) {
       draw_glider(grid, (ge_coord_t){x, y});
     }
+  }
+  // Draw some random stuff
+  for (size_t ii = 0; ii < 1000; ++ii) {
+    const size_t x = rand() % width;
+    const size_t y = rand() % height;
+    ge_grid_set_coord(grid, (ge_coord_t){x, y}, 255);
   }
   // User data to track state, etc
   user_data_t user_data = {

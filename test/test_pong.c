@@ -312,7 +312,7 @@ typedef struct user_data {
   uint32_t last_reset_time_ms;
 } user_data_t;
 
-void fade_grid(ge_grid_t* restrict grid)
+void fade_grid(ge_grid_t* grid)
 {
   for (size_t jj = 0; jj < ge_grid_get_height(grid); ++jj) {
     for (size_t ii = 0; ii < ge_grid_get_width(grid); ++ii) {
@@ -329,14 +329,14 @@ void fade_grid(ge_grid_t* restrict grid)
   }
 }
 
-void draw_horizontal_bumper(ge_grid_t* restrict grid, size_t y, size_t width)
+void draw_horizontal_bumper(ge_grid_t* grid, size_t y, size_t width)
 {
   for (size_t ii = 0; ii < width; ++ii) {
     ge_grid_set_coord(grid, (ge_coord_t){ii, y}, VALUE_ON);
   }
 }
 
-void draw_ball_bumper(ge_grid_t* restrict grid, ge_coord_t bumper_coord, size_t width)
+void draw_ball_bumper(ge_grid_t* grid, ge_coord_t bumper_coord, size_t width)
 {
   for (size_t jj = 0; jj < width; ++jj) {
     for (size_t ii = 0; ii < width; ++ii) {
@@ -352,7 +352,7 @@ size_t calc_paddle_half_size(size_t paddle_size)
   return (odd_paddle_size - 1) / 2;
 }
 
-void draw_paddle(ge_grid_t* restrict grid, ge_coord_t paddle_coord, size_t paddle_size)
+void draw_paddle(ge_grid_t* grid, ge_coord_t paddle_coord, size_t paddle_size)
 {
   // Get the number of single and double hit factor pixels
   const size_t half_paddle_size = calc_paddle_half_size(paddle_size);
@@ -380,12 +380,12 @@ void draw_paddle(ge_grid_t* restrict grid, ge_coord_t paddle_coord, size_t paddl
   }
 }
 
-void draw_ball(ge_grid_t* restrict grid, ge_coord_t ball_coord)
+void draw_ball(ge_grid_t* grid, ge_coord_t ball_coord)
 {
   ge_grid_set_coord_wrapped(grid, ball_coord, VALUE_ON);
 }
 
-void draw_score(ge_grid_t* restrict grid, ge_coord_t score_coord, size_t score)
+void draw_score(ge_grid_t* grid, ge_coord_t score_coord, size_t score)
 {
   static ge_coord_t score_coord_buffer[500];
   static char score_str[10];
@@ -421,7 +421,7 @@ heading_t heading_apply_hit(heading_t heading, uint8_t value)
   return heading;
 }
 
-void process_grid(ge_grid_t* restrict grid, user_data_t* restrict user_data)
+void process_grid(ge_grid_t* grid, user_data_t* user_data)
 {
   // Get width, height, etc
   const size_t width = ge_grid_get_width(grid);
@@ -439,7 +439,7 @@ void process_grid(ge_grid_t* restrict grid, user_data_t* restrict user_data)
   draw_score(grid, (ge_coord_t){width * 6 / 8 - 8, height / 2 - 4}, user_data->player2_score);
 }
 
-void process_one_paddle(ge_grid_t* restrict grid, user_data_t* restrict user_data, bool is_player1)
+void process_one_paddle(ge_grid_t* grid, user_data_t* user_data, bool is_player1)
 {
   // Get width of the grid
   const size_t height = ge_grid_get_height(grid);
@@ -458,13 +458,13 @@ void process_one_paddle(ge_grid_t* restrict grid, user_data_t* restrict user_dat
   draw_paddle(grid, *paddle_coord, paddle_size);
 }
 
-void process_paddles(ge_grid_t* restrict grid, user_data_t* restrict user_data)
+void process_paddles(ge_grid_t* grid, user_data_t* user_data)
 {
   process_one_paddle(grid, user_data, true);
   process_one_paddle(grid, user_data, false);
 }
 
-void process_ball(ge_grid_t* restrict grid, user_data_t* restrict user_data)
+void process_ball(ge_grid_t* grid, user_data_t* user_data)
 {
   // Update ball's coord from the current move, according to the heading
   if (user_data->ball_heading != HEADING_NONE) {
@@ -477,7 +477,7 @@ void process_ball(ge_grid_t* restrict grid, user_data_t* restrict user_data)
   draw_ball(grid, user_data->ball_coord);
 }
 
-void process_bounces(ge_grid_t* restrict grid, user_data_t* restrict user_data)
+void process_bounces(ge_grid_t* grid, user_data_t* user_data)
 {
   // Check for bounces with the paddles, bumpers, etc
   const ge_coord_t neighbor_north = ge_coord_add(user_data->ball_coord, (ge_coord_t){0, -1});
@@ -506,8 +506,7 @@ void process_bounces(ge_grid_t* restrict grid, user_data_t* restrict user_data)
   }
 }
 
-void process_score_and_reset(ge_grid_t* restrict grid, user_data_t* restrict user_data,
-                             uint32_t time_ms)
+void process_score_and_reset(ge_grid_t* grid, user_data_t* user_data, uint32_t time_ms)
 {
   // Get width and height
   const size_t width = ge_grid_get_width(grid);
@@ -536,7 +535,7 @@ void process_score_and_reset(ge_grid_t* restrict grid, user_data_t* restrict use
   }
 }
 
-void process_paddle_events(user_data_t* restrict user_data, const ge_event_t* restrict event)
+void process_paddle_events(user_data_t* user_data, const ge_event_t* event)
 {
   // Process the events to move the paddles
   if (event->type == GE_EVENT_KEYDOWN) {
@@ -575,7 +574,7 @@ void process_paddle_events(user_data_t* restrict user_data, const ge_event_t* re
   }
 }
 
-void pong_loop_func(ge_grid_t* restrict grid, void* restrict user_data_, uint32_t time_ms)
+void pong_loop_func(ge_grid_t* grid, void* user_data_, uint32_t time_ms)
 {
   // Cast the user data back to the right type
   user_data_t* user_data = (user_data_t*) user_data_;
@@ -587,8 +586,7 @@ void pong_loop_func(ge_grid_t* restrict grid, void* restrict user_data_, uint32_
   process_score_and_reset(grid, user_data, time_ms);
 }
 
-void pong_event_func(ge_grid_t* restrict grid, void* restrict user_data_, uint32_t time_ms,
-                     const ge_event_t* restrict event)
+void pong_event_func(ge_grid_t* grid, void* user_data_, uint32_t time_ms, const ge_event_t* event)
 {
   (void) grid;
   (void) time_ms;

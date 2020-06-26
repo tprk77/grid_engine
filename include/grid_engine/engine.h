@@ -31,13 +31,13 @@ extern const ge_gfx_opts_t GE_GFX_OPTS_DEFAULTS;
 
 ge_error_t ge_init(void);
 void ge_quit(void);
-ge_error_t ge_set_grid(const ge_grid_t* restrict grid);
-ge_error_t ge_set_gfx_opts(const ge_gfx_opts_t* restrict gfx_opts);
+ge_error_t ge_set_grid(const ge_grid_t* grid);
+ge_error_t ge_set_gfx_opts(const ge_gfx_opts_t* gfx_opts);
 size_t ge_auto_detect_pixel_multiplier(void);
 ge_error_t ge_create_window(void);
 ge_error_t ge_destroy_window(void);
 ge_error_t ge_redraw_window(void);
-bool ge_poll_events(ge_event_t* restrict event);
+bool ge_poll_events(ge_event_t* event);
 bool ge_should_quit(void);
 uint32_t ge_get_time_ms(void);
 void ge_sleep_ms(uint32_t duration_ms);

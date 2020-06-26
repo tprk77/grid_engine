@@ -11,21 +11,20 @@
 /**
  * The "EZ" update function type. See `ge_ez_loop` for usage.
  */
-typedef void (*ge_ez_loop_func_t)(ge_grid_t* restrict grid, void* restrict user_data,
-                                  uint32_t time_ms);
+typedef void (*ge_ez_loop_func_t)(ge_grid_t* grid, void* user_data, uint32_t time_ms);
 
 /**
  * The "EZ" event handler function type. See `ge_ez_loop` for usage.
  */
-typedef void (*ge_ez_event_func_t)(ge_grid_t* restrict grid, void* restrict user_data,
-                                   uint32_t time_ms, const ge_event_t* restrict event);
+typedef void (*ge_ez_event_func_t)(ge_grid_t* grid, void* user_data, uint32_t time_ms,
+                                   const ge_event_t* event);
 
 /**
  * The data required to run the EZ loop. See `ge_ez_loop` for usage.
  */
 typedef struct ez_loop_data {
-  ge_grid_t* restrict grid;
-  void* restrict user_data;
+  ge_grid_t* grid;
+  void* user_data;
   ge_ez_loop_func_t loop_func;
   ge_ez_event_func_t event_func;
 } ez_loop_data_t;
@@ -50,6 +49,6 @@ typedef struct ez_loop_data {
  * pointer to the user data, and the current time step in milliseconds (just
  * like the loop function), as well as the pointer to the event.
  */
-int ge_ez_loop(const ez_loop_data_t* restrict ez_loop_data);
+int ge_ez_loop(const ez_loop_data_t* ez_loop_data);
 
 #endif  // GE_EZ_LOOP_H_

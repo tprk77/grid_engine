@@ -17,7 +17,7 @@ typedef enum ge_log_level {
   GE_LOG_LEVEL_DEBUG,
 } ge_log_level_t;
 
-void ge_log(ge_log_level_t log_level, const char* restrict format, ...);
+void ge_log(ge_log_level_t log_level, const char* format, ...);
 
 #define GE_LOG_ERROR(...) ge_log(GE_LOG_LEVEL_ERROR, __VA_ARGS__)
 #define GE_LOG_WARN(...) ge_log(GE_LOG_LEVEL_WARN, __VA_ARGS__)

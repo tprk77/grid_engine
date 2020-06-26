@@ -11,8 +11,8 @@
 
 static ptrdiff_t pd_abs(ptrdiff_t v);
 
-size_t ge_utils_line_coords(ge_coord_t start_coord, ge_coord_t end_coord,
-                            ge_coord_t* restrict output_coords, size_t max_num_coords)
+size_t ge_utils_line_coords(ge_coord_t start_coord, ge_coord_t end_coord, ge_coord_t* output_coords,
+                            size_t max_num_coords)
 {
   // See also: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
   const ptrdiff_t diff_x = pd_abs(end_coord.x - start_coord.x);
@@ -41,8 +41,7 @@ size_t ge_utils_line_coords(ge_coord_t start_coord, ge_coord_t end_coord,
   return num_coords;
 }
 
-bool ge_utils_get_glyph(char glyph, const ge_coord_t** restrict glyph_coords,
-                        size_t* restrict glyph_size)
+bool ge_utils_get_glyph(char glyph, const ge_coord_t** glyph_coords, size_t* glyph_size)
 {
   *glyph_coords = NULL;
   *glyph_size = 0;
@@ -302,8 +301,8 @@ bool ge_utils_get_glyph(char glyph, const ge_coord_t** restrict glyph_coords,
   return (*glyph_coords != NULL);
 }
 
-size_t ge_utils_str_coords(const char* restrict str, ge_coord_t start_coord,
-                           ge_coord_t* restrict output_coords, size_t max_num_coords)
+size_t ge_utils_str_coords(const char* str, ge_coord_t start_coord, ge_coord_t* output_coords,
+                           size_t max_num_coords)
 {
   const char* ch = str;
   ptrdiff_t x = start_coord.x;

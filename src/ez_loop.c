@@ -12,10 +12,10 @@
 // Target 60 frames per second: 1000 ms / 60 loops = 17 ms / loop
 static const uint32_t TARGET_LOOP_MS = 17;
 
-int ge_ez_loop(const ez_loop_data_t* const restrict ez_loop_data)
+int ge_ez_loop(const ez_loop_data_t* const ez_loop_data)
 {
-  ge_grid_t* const restrict grid = ez_loop_data->grid;
-  void* const restrict user_data = ez_loop_data->user_data;
+  ge_grid_t* const grid = ez_loop_data->grid;
+  void* const user_data = ez_loop_data->user_data;
   const ge_ez_loop_func_t loop_func = ez_loop_data->loop_func;
   const ge_ez_event_func_t event_func = ez_loop_data->event_func;
   if (ge_init() != GE_OK) {

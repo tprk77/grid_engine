@@ -2,8 +2,10 @@
 
 // Licensed under an MIT style license, see LICENSE.md for details.
 // You are free to copy and modify this code. Happy hacking!
+
 #include <stdio.h>
 #include "grid_engine/grid_engine.h"
+
 int turn(int, int);
 
 enum direction { North, East, South, West };
@@ -15,7 +17,7 @@ typedef struct user_data {
   enum direction orientation;
 } user_data_t;
 
-void langton_loop_func(ge_grid_t* restrict grid, void* restrict user_data_, uint32_t time_ms)
+void langton_loop_func(ge_grid_t* grid, void* user_data_, uint32_t time_ms)
 {
   int antFound = 0;
   // Cast the user data back to the right type

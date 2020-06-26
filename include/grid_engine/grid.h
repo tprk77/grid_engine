@@ -21,19 +21,19 @@ typedef struct ge_neighbor_res {
 } ge_neighbor_res_t;
 
 ge_grid_t* ge_grid_create(size_t width, size_t height);
-void ge_grid_free(const ge_grid_t* restrict grid);
-size_t ge_grid_get_width(const ge_grid_t* restrict grid);
-size_t ge_grid_get_height(const ge_grid_t* restrict grid);
-const uint8_t* ge_grid_get_pixel_arr(const ge_grid_t* restrict grid);
-uint8_t* ge_grid_get_pixel_arr_mut(ge_grid_t* restrict grid);
-void ge_grid_copy_pixel_arr(ge_grid_t* restrict grid, const ge_grid_t* restrict other);
-void ge_grid_clear_pixel_arr(ge_grid_t* restrict grid);
-bool ge_grid_has_coord(const ge_grid_t* restrict grid, ge_coord_t coord);
-uint8_t ge_grid_get_coord(const ge_grid_t* restrict grid, ge_coord_t coord);
-void ge_grid_set_coord(ge_grid_t* restrict grid, ge_coord_t coord, uint8_t value);
-uint8_t ge_grid_get_coord_wrapped(const ge_grid_t* restrict grid, ge_coord_t offset);
-void ge_grid_set_coord_wrapped(ge_grid_t* restrict grid, ge_coord_t offset, uint8_t value);
-ge_neighbor_res_t ge_grid_get_neighbors(const ge_grid_t* restrict grid, ge_coord_t coord);
-ge_neighbor_res_t ge_grid_get_neighbors_wrapped(const ge_grid_t* restrict grid, ge_coord_t coord);
+void ge_grid_free(const ge_grid_t* grid);
+size_t ge_grid_get_width(const ge_grid_t* grid);
+size_t ge_grid_get_height(const ge_grid_t* grid);
+const uint8_t* ge_grid_get_pixel_arr(const ge_grid_t* grid);
+uint8_t* ge_grid_get_pixel_arr_mut(ge_grid_t* grid);
+void ge_grid_copy_pixel_arr(ge_grid_t* grid, const ge_grid_t* other);
+void ge_grid_clear_pixel_arr(ge_grid_t* grid);
+bool ge_grid_has_coord(const ge_grid_t* grid, ge_coord_t coord);
+uint8_t ge_grid_get_coord(const ge_grid_t* grid, ge_coord_t coord);
+void ge_grid_set_coord(ge_grid_t* grid, ge_coord_t coord, uint8_t value);
+uint8_t ge_grid_get_coord_wrapped(const ge_grid_t* grid, ge_coord_t offset);
+void ge_grid_set_coord_wrapped(ge_grid_t* grid, ge_coord_t offset, uint8_t value);
+ge_neighbor_res_t ge_grid_get_neighbors(const ge_grid_t* grid, ge_coord_t coord);
+ge_neighbor_res_t ge_grid_get_neighbors_wrapped(const ge_grid_t* grid, ge_coord_t coord);
 
 #endif  // GE_GRID_H_

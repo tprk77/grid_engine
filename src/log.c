@@ -7,7 +7,7 @@
 
 #include "SDL2/SDL.h"
 
-void ge_log(ge_log_level_t log_level, const char* restrict format, ...)
+void ge_log(ge_log_level_t log_level, const char* format, ...)
 {
   SDL_LogPriority sdl_priority;
   switch (log_level) {

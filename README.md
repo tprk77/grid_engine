@@ -279,7 +279,7 @@ Next we will define the loop update function. We start by casting the user data
 from a void pointer back to the real type:
 
 ```
-void conway_loop_func(ge_grid_t* restrict grid, void* restrict user_data_, uint32_t time_ms)
+void conway_loop_func(ge_grid_t* grid, void* user_data_, uint32_t time_ms)
 {
   // Cast the user data back to the right type
   user_data_t* user_data = (user_data_t*) user_data_;

@@ -135,7 +135,7 @@ typedef struct ge_event {
   };
 } ge_event_t;
 
-bool ge_fill_event(ge_event_t* restrict event, void* restrict internal_event);
+bool ge_fill_event(ge_event_t* event, void* internal_event);
 
 const char* ge_keycode_to_str(ge_keycode_t keycode);
 
