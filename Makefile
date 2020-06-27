@@ -1,4 +1,8 @@
-# Copyright (c) 2019 Tim Perkins
+# Copyright (c) 2020 Tim Perkins
+
+#########
+# SETUP #
+#########
 
 SHELL := /bin/bash
 .ONESHELL:
@@ -6,71 +10,155 @@ SHELL := /bin/bash
 .DELETE_ON_ERROR:
 MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
+ifeq ($(origin .RECIPEPREFIX), undefined)
+  $(error Please use a version of Make supporting .RECIPEPREFIX)
+endif
+.RECIPEPREFIX = >
+
+# On a Windows build this will be set to "t", otherwise it's blank
+IS_WIN = $(if $(findstring Windows_NT,$(OS)),t,)
+
+# HACK Adjust the vpath to find libraries on Windows and MSYS2. This is
+# necessary because without it, the libraries being used as prerequisites (and
+# translated by .LIBPATTERNS) weren't getting located properly.
+ifeq ($(IS_WIN), t)
+  MINGW_LIB_DIR := /mingw64/lib
+  MINGW_BIN_DIR := /mingw64/bin
+  vpath %.a $(MINGW_LIB_DIR)
+  vpath %.dll.a $(MINGW_LIB_DIR)
+  vpath %.dll $(MINGW_BIN_DIR)
+endif
+
+##########
+# COMMON #
+##########
+
+# This is the default target, and should always be first
+all:
+
+CP := cp
+MKDIR := mkdir
 
 DEBUG := -O0 -g
 CFLAGS := -std=c11 -Wall -Wextra -Werror -fPIC $(DEBUG)
-INCLUDE := -Iinclude
 LDFLAGS := -static-libgcc
+
+# Usage: $(call make-depend,src,obj,dep)
+#
+# This function assumes a capable version of gcc which supports the -MM, -MF,
+# -MP, and -MT options. As an explaination, -MM will generate dependencies, -MF
+# will set the output filename, -MP will generate empty rules for prerequisites
+# (which avoid issues with deleted files), and -MT set the target for the rule.
+#
+define make-depend
+  $(CC) -MM -MF $3 -MP -MT $2 $(CFLAGS) $1
+endef
 
 #######################
 # GRID ENGINE LIBRARY #
 #######################
 
-SRCS := src/coord.c src/engine.c src/event.c src/ez_loop.c src/grid.c src/log.c src/utils.c
-OBJS := $(patsubst src/%.c,build/tmp/%.o,$(SRCS))
+GE_SRC_DIR := src
+GE_INC_DIR := include
+GE_BLD_DIR := build
 
-SDL_LIBS := -lSDL2main -lSDL2
-ifeq ($(OS), Windows_NT)
-  LIB_GRID_ENGINE := build/grid_engine.dll
-  LIB_GE_LIBS := $(SDL_LIBS)
-  LIB_GE_IMPLIB := -Wl,--out-implib,build/libgrid_engine.a
-else
-  LIB_GRID_ENGINE := build/libgrid_engine.so
-  LIB_GE_LIBS :=
-  LIB_GE_IMPLIB :=
+CFLAGS += -I $(GE_INC_DIR)
+
+GE_SRCS := $(wildcard $(GE_SRC_DIR)/*.c)
+GE_OBJS := $(patsubst $(GE_SRC_DIR)/%.c,$(GE_BLD_DIR)/%.o,$(GE_SRCS))
+GE_DEPS := $(patsubst $(GE_BLD_DIR)/%.o,$(GE_BLD_DIR)/%.d,$(GE_OBJS))
+
+# The library is either an .so or .dll. The import library is always a .dll.a,
+# but should only exist on a Windows build.
+GE_LIB_EXT := $(if $(IS_WIN),dll,so)
+GE_LIB_GE := $(GE_BLD_DIR)/libgrid_engine.$(GE_LIB_EXT)
+GE_IMPLIB_GE := $(if $(IS_WIN),$(GE_BLD_DIR)/libgrid_engine.dll.a,)
+
+# If the import library exists, then construct the linker argument
+GE_WIN_OUT_IMPLIB := -Wl,--out-implib,$(GE_IMPLIB_GE)
+GE_OUT_IMPLIB := $(if $(GE_IMPLIB_GE),$(GE_WIN_OUT_IMPLIB),)
+
+SDL_LIBS := -lSDL2
+
+$(GE_BLD_DIR):
+> $(MKDIR) -p $@
+
+# Note that this will always generate a dependency file (.d) alongside the
+# object file, so one will not exist without the other.
+$(GE_BLD_DIR)/%.o: $(GE_SRC_DIR)/%.c | $(GE_BLD_DIR)
+> $(call make-depend,$<,$@,$(subst .o,.d,$@))
+> $(CC) $(CFLAGS) -c $< -o $@
+
+$(GE_LIB_GE): $(GE_OBJS) $(SDL_LIBS) | $(GE_BLD_DIR)
+> $(CC) $(CFLAGS) $(LDFLAGS) -shared $^ -o $@ $(GE_OUT_IMPLIB)
+
+# Include the dependency files, but only if we're not cleaning out the build.
+# Also if the dependency is missing, just ignore that error. If the dependency
+# doesn't exist, neither does the object file.
+ifneq ($(MAKECMDGOALS), clean)
+  -include $(GE_DEPS)
 endif
 
-all: $(LIB_GRID_ENGINE)
-
-build/tmp:
-	mkdir -p $@
-
-build/tmp/%.o: src/%.c | build/tmp
-	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
-
-$(LIB_GRID_ENGINE): $(OBJS)
-	$(CC) -shared $^ $(LIB_GE_LIBS) $(LIB_GE_IMPLIB) -o $@
+.PHONY: all
+all: $(GE_LIB_GE)
 
 #####################
 # GRID ENGINE TESTS #
 #####################
 
-TESTS := build/test_conway build/test_pong build/test_langton
-TEST_LIBS := -L$(CURDIR)/build -Wl,-rpath=$(CURDIR)/build -lgrid_engine $(SDL_LIBS)
+GE_TEST_DIR := test
 
-ifeq ($(OS), Windows_NT)
-  COPY_DLLS := build/SDL2.dll
-else
-  COPY_DLLS :=
+GE_TCNW_SRCS := $(GE_TEST_DIR)/test_conway.c
+GE_TCNW_OBJS := $(patsubst $(GE_TEST_DIR)/%.c,$(GE_BLD_DIR)/%.o,$(GE_TCNW_SRCS))
+GE_TCNW_DEPS := $(patsubst $(GE_BLD_DIR)/%.o,$(GE_BLD_DIR)/%.d,$(GE_TCNW_OBJS))
+
+GE_TEST_CONWAY := $(GE_BLD_DIR)/test_conway
+
+GE_TLNG_SRCS := $(GE_TEST_DIR)/test_langton.c
+GE_TLNG_OBJS := $(patsubst $(GE_TEST_DIR)/%.c,$(GE_BLD_DIR)/%.o,$(GE_TLNG_SRCS))
+GE_TLNG_DEPS := $(patsubst $(GE_BLD_DIR)/%.o,$(GE_BLD_DIR)/%.d,$(GE_TLNG_OBJS))
+
+GE_TEST_LANGTON := $(GE_BLD_DIR)/test_langton
+
+GE_TPNG_SRCS := $(GE_TEST_DIR)/test_pong.c
+GE_TPNG_OBJS := $(patsubst $(GE_TEST_DIR)/%.c,$(GE_BLD_DIR)/%.o,$(GE_TPNG_SRCS))
+GE_TPNG_DEPS := $(patsubst $(GE_BLD_DIR)/%.o,$(GE_BLD_DIR)/%.d,$(GE_TPNG_OBJS))
+
+GE_TEST_PONG := $(GE_BLD_DIR)/test_pong
+
+# HACK Any DLLs we want to copy to the build directory
+GE_CP_DLL := $(if $(IS_WIN),$(GE_BLD_DIR)/SDL2.dll,)
+
+$(GE_BLD_DIR)/%.o: $(GE_TEST_DIR)/%.c | $(GE_BLD_DIR)
+> $(call make-depend,$<,$@,$(subst .o,.d,$@))
+> $(CC) $(CFLAGS) -c $< -o $@
+
+$(GE_TEST_CONWAY): $(GE_TCNW_OBJS) $(GE_LIB_GE) $(SDL_LIBS) | $(GE_BLD_DIR) $(GE_CP_DLL)
+> $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
+
+$(GE_TEST_LANGTON): $(GE_TLNG_OBJS) $(GE_LIB_GE) $(SDL_LIBS) | $(GE_BLD_DIR) $(GE_CP_DLL)
+> $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
+
+$(GE_TEST_PONG): $(GE_TPNG_OBJS) $(GE_LIB_GE) $(SDL_LIBS) | $(GE_BLD_DIR) $(GE_CP_DLL)
+> $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
+
+# Copy DLLs on Windows, using VPATH to locate them
+$(GE_BLD_DIR)/%.dll: %.dll | $(GE_BLD_DIR)
+> $(CP) $< $@
+
+ifneq ($(MAKECMDGOALS), clean)
+  -include $(GE_TCNW_DEPS)
+  -include $(GE_TLNG_DEPS)
+  -include $(GE_TPNG_DEPS)
 endif
 
-tests: $(LIB_GRID_ENGINE) $(TESTS)
-
-build/tmp/%.o: test/%.c | build/tmp
-	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
-
-build/test_%: build/tmp/test_%.o $(LIB_GRID_ENGINE) | $(COPY_DLLS)
-	$(CC) $(LDFLAGS) $< $(TEST_LIBS) -o $@
-
-build/SDL2.dll: /mingw64/bin/SDL2.dll
-	cp $< $@
+.PHONY: tests
+tests: $(GE_TEST_CONWAY) $(GE_TEST_LANGTON) $(GE_TEST_PONG)
 
 #########
 # OTHER #
 #########
 
+.PHONY: clean
 clean:
-	-rm -rf build
-
-# List of all fake targets
-.PHONY: all tests clean
+> -$(RM) -r build
