@@ -1,0 +1,19 @@
+# tprk77/gridengineci:ubuntu2004
+
+FROM ubuntu:20.04
+
+# Make sure we don't get prompted
+ENV DEBIAN_FRONTEND noninteractive
+
+# Install a recent version of Git
+RUN apt-get update -qq \
+        && apt-get install --no-install-recommends -qq -y software-properties-common \
+        && add-apt-repository -y ppa:git-core/ppa \
+        && apt-get update -qq \
+        && apt-get install --no-install-recommends -qq -y git
+
+# Install build tools and dependencies
+RUN apt-get update -qq \
+        && apt-get install --no-install-recommends -qq -y \
+            build-essential \
+            libsdl2-dev
