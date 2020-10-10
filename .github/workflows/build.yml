@@ -1,0 +1,27 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+      - wip
+  pull_request:
+    branches:
+      - master
+      - wip
+
+jobs:
+  ubuntu-build:
+    name: Ubuntu Build
+    runs-on: ubuntu-latest
+    container:
+      image: ${{matrix.container}}
+    strategy:
+      matrix:
+        container:
+          - tprk77/gridengineci:ubuntu1804
+          - tprk77/gridengineci:ubuntu2004
+    steps:
+      - uses: actions/checkout@v2
+      - run: make
+      - run: make tests
