@@ -93,7 +93,7 @@ size_t ge_auto_detect_pixel_multiplier(void)
   if (!ge_engine.inited) {
     return FALLBACK_PIXEL_MULTIPLIER;
   }
-  else if (!ge_engine.grid) {
+  else if (ge_engine.grid == NULL) {
     return FALLBACK_PIXEL_MULTIPLIER;
   }
   SDL_Rect disp_rect;
@@ -121,7 +121,7 @@ ge_error_t ge_create_window()
   else if (ge_engine.has_window) {
     return GE_ERROR_ALREADY_HAS_WINDOW;
   }
-  else if (!ge_engine.grid) {
+  else if (ge_engine.grid == NULL) {
     return GE_ERROR_NO_GRID_SET;
   }
   GE_LOG_INFO("Grid engine window being created!");
@@ -279,13 +279,13 @@ static uint32_t pixel_rbga(uint8_t pixel_value)
 
 static void destroy_engine_sdl()
 {
-  if (ge_engine.sdl_texture) {
+  if (ge_engine.sdl_texture != NULL) {
     SDL_DestroyTexture(ge_engine.sdl_texture);
   }
-  if (ge_engine.sdl_renderer) {
+  if (ge_engine.sdl_renderer != NULL) {
     SDL_DestroyRenderer(ge_engine.sdl_renderer);
   }
-  if (ge_engine.sdl_window) {
+  if (ge_engine.sdl_window != NULL) {
     SDL_DestroyWindow(ge_engine.sdl_window);
   }
   ge_engine.sdl_texture = NULL;
