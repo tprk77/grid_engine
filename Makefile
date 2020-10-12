@@ -126,6 +126,12 @@ GE_TPNG_DEPS := $(patsubst $(GE_BLD_DIR)/%.o,$(GE_BLD_DIR)/%.d,$(GE_TPNG_OBJS))
 
 GE_TEST_PONG := $(GE_BLD_DIR)/test_pong
 
+GE_TPLT_SRCS := $(GE_TEST_DIR)/test_palette.c
+GE_TPLT_OBJS := $(patsubst $(GE_TEST_DIR)/%.c,$(GE_BLD_DIR)/%.o,$(GE_TPLT_SRCS))
+GE_TPLT_DEPS := $(patsubst $(GE_BLD_DIR)/%.o,$(GE_BLD_DIR)/%.d,$(GE_TPLT_OBJS))
+
+GE_TEST_PALETTE := $(GE_BLD_DIR)/test_palette
+
 # HACK Any DLLs we want to copy to the build directory
 GE_CP_DLL := $(if $(IS_WIN),$(GE_BLD_DIR)/SDL2.dll,)
 
@@ -142,6 +148,9 @@ $(GE_TEST_LANGTON): $(GE_TLNG_OBJS) $(GE_LIB_GE) $(SDL_LIBS) | $(GE_BLD_DIR) $(G
 $(GE_TEST_PONG): $(GE_TPNG_OBJS) $(GE_LIB_GE) $(SDL_LIBS) | $(GE_BLD_DIR) $(GE_CP_DLL)
 > $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
 
+$(GE_TEST_PALETTE): $(GE_TPLT_OBJS) $(GE_LIB_GE) $(SDL_LIBS) | $(GE_BLD_DIR) $(GE_CP_DLL)
+> $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
+
 # Copy DLLs on Windows, using VPATH to locate them
 $(GE_BLD_DIR)/%.dll: %.dll | $(GE_BLD_DIR)
 > $(CP) $< $@
@@ -150,10 +159,11 @@ ifneq ($(MAKECMDGOALS), clean)
   -include $(GE_TCNW_DEPS)
   -include $(GE_TLNG_DEPS)
   -include $(GE_TPNG_DEPS)
+  -include $(GE_TPLT_DEPS)
 endif
 
 .PHONY: tests
-tests: $(GE_TEST_CONWAY) $(GE_TEST_LANGTON) $(GE_TEST_PONG)
+tests: $(GE_TEST_CONWAY) $(GE_TEST_LANGTON) $(GE_TEST_PONG) $(GE_TEST_PALETTE)
 
 #########
 # OTHER #
