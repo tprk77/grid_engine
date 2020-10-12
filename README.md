@@ -233,8 +233,8 @@ of the grid and will always return all eight neighbors.
 
 ## Examples ##
 
-Here's Conway's Game of Life implemented as a test. The full source is
-[available here!][test_conway.c]
+Here's Conway's Game of Life implemented as a demo. The full source is
+[available here!][demo_conway.c]
 
 First we include the header and define our user data:
 
@@ -382,12 +382,12 @@ int main(void)
 }
 ```
 
-The full source is [available here!][test_conway.c]
+The full source is [available here!][demo_conway.c]
 
 
 ## Building ##
 
-Before we're able to build Grid Engine and it's tests, we need to setup the
+Before we're able to build Grid Engine and it's demos, we need to setup the
 development environment. I've been able to build Grid Engine on Ubuntu and
 Windows using MSYS2 and the MinGW compiler.
 
@@ -442,22 +442,20 @@ should look something like this:
 
 ```
 $ cd grid_engine
-$ make tests
-mkdir -p build/tmp
-cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -Iinclude -c src/coord.c -o build/tmp/coord.o
-cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -Iinclude -c src/engine.c -o build/tmp/engine.o
-cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -Iinclude -c src/event.c -o build/tmp/event.o
-cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -Iinclude -c src/ez_loop.c -o build/tmp/ez_loop.o
-cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -Iinclude -c src/grid.c -o build/tmp/grid.o
-cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -Iinclude -c src/log.c -o build/tmp/log.o
-cc -shared build/tmp/coord.o build/tmp/engine.o build/tmp/event.o build/tmp/ez_loop.o \
-  build/tmp/grid.o build/tmp/log.o   -o build/libgrid_engine.so
-if [ -f "/mingw64/bin/SDL2.dll" ]; then cp "/mingw64/bin/SDL2.dll" -t build; fi
-cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -Iinclude -c test/test_conway.c \
-  -o build/tmp/test_conway.o
-cc -static-libgcc build/tmp/test_conway.o -L/home/tim/grid_engine/build \
-  -Wl,-rpath=/home/tim/grid_engine/build -lgrid_engine -lSDL2main -lSDL2 -o build/test_conway
-rm build/tmp/test_conway.o
+$ make demos
+...
+cc -MM -MF build/demo_conway.d -MP -MT build/demo_conway.o -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -I include demos/demo_conway.c
+cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -I include -c demos/demo_conway.c -o build/demo_conway.o
+cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -I include -static-libgcc build/demo_conway.o build/libgrid_engine.so /usr/lib/x86_64-linux-gnu/libSDL2.so -o build/demo_conway
+cc -MM -MF build/demo_langton.d -MP -MT build/demo_langton.o -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -I include demos/demo_langton.c
+cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -I include -c demos/demo_langton.c -o build/demo_langton.o
+cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -I include -static-libgcc build/demo_langton.o build/libgrid_engine.so /usr/lib/x86_64-linux-gnu/libSDL2.so -o build/demo_langton
+cc -MM -MF build/demo_pong.d -MP -MT build/demo_pong.o -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -I include demos/demo_pong.c
+cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -I include -c demos/demo_pong.c -o build/demo_pong.o
+cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -I include -static-libgcc build/demo_pong.o build/libgrid_engine.so /usr/lib/x86_64-linux-gnu/libSDL2.so -o build/demo_pong
+cc -MM -MF build/demo_palette.d -MP -MT build/demo_palette.o -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -I include demos/demo_palette.c
+cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -I include -c demos/demo_palette.c -o build/demo_palette.o
+cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -I include -static-libgcc build/demo_palette.o build/libgrid_engine.so /usr/lib/x86_64-linux-gnu/libSDL2.so -o build/demo_palette
 ```
 
 
@@ -474,7 +472,7 @@ rm build/tmp/test_conway.o
 [ez_loop.h]: include/grid_engine/ez_loop.h
 [grid.h]: include/grid_engine/grid.h
 [opaque_pointer]: https://en.wikipedia.org/wiki/Opaque_pointer
-[test_conway.c]: test/test_conway.c
+[demo_conway.c]: demo/demo_conway.c
 [msys2]: https://www.msys2.org
 
 
