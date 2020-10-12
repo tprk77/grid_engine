@@ -103,52 +103,52 @@ endif
 all: $(GE_LIB_GE)
 
 #####################
-# GRID ENGINE TESTS #
+# GRID ENGINE DEMOS #
 #####################
 
-GE_TEST_DIR := test
+GE_DEMO_DIR := demos
 
-GE_TCNW_SRCS := $(GE_TEST_DIR)/test_conway.c
-GE_TCNW_OBJS := $(patsubst $(GE_TEST_DIR)/%.c,$(GE_BLD_DIR)/%.o,$(GE_TCNW_SRCS))
-GE_TCNW_DEPS := $(patsubst $(GE_BLD_DIR)/%.o,$(GE_BLD_DIR)/%.d,$(GE_TCNW_OBJS))
+GE_DCNW_SRCS := $(GE_DEMO_DIR)/demo_conway.c
+GE_DCNW_OBJS := $(patsubst $(GE_DEMO_DIR)/%.c,$(GE_BLD_DIR)/%.o,$(GE_DCNW_SRCS))
+GE_DCNW_DEPS := $(patsubst $(GE_BLD_DIR)/%.o,$(GE_BLD_DIR)/%.d,$(GE_DCNW_OBJS))
 
-GE_TEST_CONWAY := $(GE_BLD_DIR)/test_conway
+GE_DEMO_CONWAY := $(GE_BLD_DIR)/demo_conway
 
-GE_TLNG_SRCS := $(GE_TEST_DIR)/test_langton.c
-GE_TLNG_OBJS := $(patsubst $(GE_TEST_DIR)/%.c,$(GE_BLD_DIR)/%.o,$(GE_TLNG_SRCS))
-GE_TLNG_DEPS := $(patsubst $(GE_BLD_DIR)/%.o,$(GE_BLD_DIR)/%.d,$(GE_TLNG_OBJS))
+GE_DLNG_SRCS := $(GE_DEMO_DIR)/demo_langton.c
+GE_DLNG_OBJS := $(patsubst $(GE_DEMO_DIR)/%.c,$(GE_BLD_DIR)/%.o,$(GE_DLNG_SRCS))
+GE_DLNG_DEPS := $(patsubst $(GE_BLD_DIR)/%.o,$(GE_BLD_DIR)/%.d,$(GE_DLNG_OBJS))
 
-GE_TEST_LANGTON := $(GE_BLD_DIR)/test_langton
+GE_DEMO_LANGTON := $(GE_BLD_DIR)/demo_langton
 
-GE_TPNG_SRCS := $(GE_TEST_DIR)/test_pong.c
-GE_TPNG_OBJS := $(patsubst $(GE_TEST_DIR)/%.c,$(GE_BLD_DIR)/%.o,$(GE_TPNG_SRCS))
-GE_TPNG_DEPS := $(patsubst $(GE_BLD_DIR)/%.o,$(GE_BLD_DIR)/%.d,$(GE_TPNG_OBJS))
+GE_DPNG_SRCS := $(GE_DEMO_DIR)/demo_pong.c
+GE_DPNG_OBJS := $(patsubst $(GE_DEMO_DIR)/%.c,$(GE_BLD_DIR)/%.o,$(GE_DPNG_SRCS))
+GE_DPNG_DEPS := $(patsubst $(GE_BLD_DIR)/%.o,$(GE_BLD_DIR)/%.d,$(GE_DPNG_OBJS))
 
-GE_TEST_PONG := $(GE_BLD_DIR)/test_pong
+GE_DEMO_PONG := $(GE_BLD_DIR)/demo_pong
 
-GE_TPLT_SRCS := $(GE_TEST_DIR)/test_palette.c
-GE_TPLT_OBJS := $(patsubst $(GE_TEST_DIR)/%.c,$(GE_BLD_DIR)/%.o,$(GE_TPLT_SRCS))
-GE_TPLT_DEPS := $(patsubst $(GE_BLD_DIR)/%.o,$(GE_BLD_DIR)/%.d,$(GE_TPLT_OBJS))
+GE_DPLT_SRCS := $(GE_DEMO_DIR)/demo_palette.c
+GE_DPLT_OBJS := $(patsubst $(GE_DEMO_DIR)/%.c,$(GE_BLD_DIR)/%.o,$(GE_DPLT_SRCS))
+GE_DPLT_DEPS := $(patsubst $(GE_BLD_DIR)/%.o,$(GE_BLD_DIR)/%.d,$(GE_DPLT_OBJS))
 
-GE_TEST_PALETTE := $(GE_BLD_DIR)/test_palette
+GE_DEMO_PALETTE := $(GE_BLD_DIR)/demo_palette
 
 # HACK Any DLLs we want to copy to the build directory
 GE_CP_DLL := $(if $(IS_WIN),$(GE_BLD_DIR)/SDL2.dll,)
 
-$(GE_BLD_DIR)/%.o: $(GE_TEST_DIR)/%.c | $(GE_BLD_DIR)
+$(GE_BLD_DIR)/%.o: $(GE_DEMO_DIR)/%.c | $(GE_BLD_DIR)
 > $(call make-depend,$<,$@,$(subst .o,.d,$@))
 > $(CC) $(CFLAGS) -c $< -o $@
 
-$(GE_TEST_CONWAY): $(GE_TCNW_OBJS) $(GE_LIB_GE) $(SDL_LIBS) | $(GE_BLD_DIR) $(GE_CP_DLL)
+$(GE_DEMO_CONWAY): $(GE_DCNW_OBJS) $(GE_LIB_GE) $(SDL_LIBS) | $(GE_BLD_DIR) $(GE_CP_DLL)
 > $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
 
-$(GE_TEST_LANGTON): $(GE_TLNG_OBJS) $(GE_LIB_GE) $(SDL_LIBS) | $(GE_BLD_DIR) $(GE_CP_DLL)
+$(GE_DEMO_LANGTON): $(GE_DLNG_OBJS) $(GE_LIB_GE) $(SDL_LIBS) | $(GE_BLD_DIR) $(GE_CP_DLL)
 > $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
 
-$(GE_TEST_PONG): $(GE_TPNG_OBJS) $(GE_LIB_GE) $(SDL_LIBS) | $(GE_BLD_DIR) $(GE_CP_DLL)
+$(GE_DEMO_PONG): $(GE_DPNG_OBJS) $(GE_LIB_GE) $(SDL_LIBS) | $(GE_BLD_DIR) $(GE_CP_DLL)
 > $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
 
-$(GE_TEST_PALETTE): $(GE_TPLT_OBJS) $(GE_LIB_GE) $(SDL_LIBS) | $(GE_BLD_DIR) $(GE_CP_DLL)
+$(GE_DEMO_PALETTE): $(GE_DPLT_OBJS) $(GE_LIB_GE) $(SDL_LIBS) | $(GE_BLD_DIR) $(GE_CP_DLL)
 > $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
 
 # Copy DLLs on Windows, using VPATH to locate them
@@ -156,14 +156,14 @@ $(GE_BLD_DIR)/%.dll: %.dll | $(GE_BLD_DIR)
 > $(CP) $< $@
 
 ifneq ($(MAKECMDGOALS), clean)
-  -include $(GE_TCNW_DEPS)
-  -include $(GE_TLNG_DEPS)
-  -include $(GE_TPNG_DEPS)
-  -include $(GE_TPLT_DEPS)
+  -include $(GE_DCNW_DEPS)
+  -include $(GE_DLNG_DEPS)
+  -include $(GE_DPNG_DEPS)
+  -include $(GE_DPLT_DEPS)
 endif
 
 .PHONY: tests
-tests: $(GE_TEST_CONWAY) $(GE_TEST_LANGTON) $(GE_TEST_PONG) $(GE_TEST_PALETTE)
+demos: $(GE_DEMO_CONWAY) $(GE_DEMO_LANGTON) $(GE_DEMO_PONG) $(GE_DEMO_PALETTE)
 
 #########
 # OTHER #
