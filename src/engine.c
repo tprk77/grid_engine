@@ -10,12 +10,14 @@
 #include "grid_engine/log.h"
 
 static void abort_on_null(const void* ptr);
-static uint32_t pixel_rbga(uint8_t pixel_value);
+static ge_color_t pixel_grayscale(uint8_t pixel_value);
+static uint32_t pixel_rbga(ge_color_t pixel_color);
 static void destroy_engine_sdl();
 
 typedef struct ge_engine {
   bool inited;
   const ge_grid_t* grid;
+  const ge_palette_t* palette;
   ge_gfx_opts_t gfx_opts;
   bool has_window;
   SDL_Window* sdl_window;
@@ -28,6 +30,7 @@ typedef struct ge_engine {
 #define GE_ENGINE_DEFAULTS_K { \
     .inited = false, \
     .grid = NULL, \
+    .palette = NULL, \
     .gfx_opts = GE_GFX_OPTS_DEFAULTS_K, \
     .has_window = false, \
     .sdl_window = NULL, \
@@ -74,6 +77,16 @@ ge_error_t ge_set_grid(const ge_grid_t* grid)
     return GE_ERROR_NOT_INITED;
   }
   ge_engine.grid = grid;
+  return GE_OK;
+}
+
+ge_error_t ge_set_palette(const ge_palette_t* palette)
+{
+  // The palette can be set to null, in which case we use grayscale
+  if (!ge_engine.inited) {
+    return GE_ERROR_NOT_INITED;
+  }
+  ge_engine.palette = palette;
   return GE_OK;
 }
 
@@ -196,7 +209,9 @@ ge_error_t ge_redraw_window()
     for (size_t ii = 0; ii < width; ii++) {
       uint32_t* const tex_pixel = &tex_pixel_row[ii];
       const uint8_t pixel_value = pixel_arr[jj * width + ii];
-      *tex_pixel = pixel_rbga(pixel_value);
+      const ge_color_t pixel_color = (ge_engine.palette ? ge_engine.palette->colormap[pixel_value]
+                                                        : pixel_grayscale(pixel_value));
+      *tex_pixel = pixel_rbga(pixel_color);
     }
   }
   SDL_UnlockTexture(ge_engine.sdl_texture);
@@ -253,6 +268,11 @@ static void abort_on_null(const void* ptr)
   }
 }
 
+static ge_color_t pixel_grayscale(uint8_t pixel_value)
+{
+  return (ge_color_t){pixel_value, pixel_value, pixel_value};
+}
+
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
 #define RGBA_R_SHIFT 24
 #define RGBA_B_SHIFT 16
@@ -265,11 +285,11 @@ static void abort_on_null(const void* ptr)
 #define RGBA_A_SHIFT 24
 #endif
 
-static uint32_t pixel_rbga(uint8_t pixel_value)
+static uint32_t pixel_rbga(ge_color_t pixel_color)
 {
   // Assumes texture format is SDL_PIXELFORMAT_RGBA8888
-  return ((pixel_value << RGBA_R_SHIFT) | (pixel_value << RGBA_G_SHIFT)
-          | (pixel_value << RGBA_B_SHIFT) | (255 << RGBA_A_SHIFT));
+  return ((pixel_color.red << RGBA_R_SHIFT) | (pixel_color.green << RGBA_G_SHIFT)
+          | (pixel_color.blue << RGBA_B_SHIFT) | (255 << RGBA_A_SHIFT));
 }
 
 #undef RGBA_R_SHIFT
