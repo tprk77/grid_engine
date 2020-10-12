@@ -13,6 +13,7 @@
 #include "grid_engine/error.h"
 #include "grid_engine/event.h"
 #include "grid_engine/grid.h"
+#include "grid_engine/palette.h"
 
 // TODO Other graphics options like fullscreen
 typedef struct ge_gfx_opts {
@@ -32,6 +33,7 @@ extern const ge_gfx_opts_t GE_GFX_OPTS_DEFAULTS;
 ge_error_t ge_init(void);
 void ge_quit(void);
 ge_error_t ge_set_grid(const ge_grid_t* grid);
+ge_error_t ge_set_palette(const ge_palette_t* palette);
 ge_error_t ge_set_gfx_opts(const ge_gfx_opts_t* gfx_opts);
 size_t ge_auto_detect_pixel_multiplier(void);
 ge_error_t ge_create_window(void);

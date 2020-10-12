@@ -116,6 +116,7 @@ int main(void)
   // The EZ loop data
   ez_loop_data_t ez_loop_data = {
       .grid = grid,
+      .palette = NULL,
       .user_data = &user_data,
       .loop_func = langton_loop_func,
       .event_func = NULL,
