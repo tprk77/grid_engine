@@ -255,13 +255,13 @@ static void abort_on_null(const void* ptr)
 
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
 #define RGBA_R_SHIFT 24
-#define RGBA_G_SHIFT 16
-#define RGBA_B_SHIFT 8
+#define RGBA_B_SHIFT 16
+#define RGBA_G_SHIFT 8
 #define RGBA_A_SHIFT 0
 #else
 #define RGBA_R_SHIFT 0
-#define RGBA_G_SHIFT 8
-#define RGBA_B_SHIFT 16
+#define RGBA_B_SHIFT 8
+#define RGBA_G_SHIFT 16
 #define RGBA_A_SHIFT 24
 #endif
 
