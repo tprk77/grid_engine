@@ -150,7 +150,7 @@ between 0 and 255 are varying shades of gray. Colors not currently
 supported, sorry!
 
 **`ge_grid_t* ge_grid_create(size_t width, size_t height);`**<br>
-**`void ge_grid_free(const ge_grid_t* grid);`**
+**`void ge_grid_free(ge_grid_t* grid);`**
 
 These two functions are used to create and free (destroy) grids. When a grid is
 created, a pixel array is automatically allocated for the given width and

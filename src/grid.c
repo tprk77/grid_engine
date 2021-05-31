@@ -30,25 +30,26 @@ static const ge_neighbor_res_t GE_NEIGHBOR_RES_DEFAULTS = {
 ge_grid_t* ge_grid_create(size_t width, size_t height)
 {
   ge_grid_t* grid = calloc(1, sizeof(ge_grid_t));
-  if (!grid) {
+  if (grid == NULL) {
     return NULL;
   }
   grid->width = width;
   grid->height = height;
   grid->pixel_arr = calloc(grid->width * grid->height, sizeof(uint8_t));
-  if (!grid->pixel_arr) {
+  if (grid->pixel_arr == NULL) {
     free(grid);
     return NULL;
   }
   return grid;
 }
 
-void ge_grid_free(const ge_grid_t* grid)
+void ge_grid_free(ge_grid_t* grid)
 {
-  if (grid) {
-    free((void*) grid->pixel_arr);
-    free((void*) grid);
+  if (grid == NULL) {
+    return;
   }
+  free(grid->pixel_arr);
+  free(grid);
 }
 
 size_t ge_grid_get_width(const ge_grid_t* grid)
