@@ -40,7 +40,7 @@ CP := cp
 MKDIR := mkdir
 
 DEBUG := -O0 -g
-CFLAGS := -std=c11 -Wall -Wextra -Werror -fPIC $(DEBUG)
+CFLAGS := -std=c11 -Wall -Wextra -Werror -fPIC $(DEBUG) $(CFLAGS)
 LDFLAGS := -static-libgcc
 
 # Usage: $(call make-depend,src,obj,dep)
