@@ -9,7 +9,7 @@ IFS=$'\n\t'
 
 readonly C_FILENAME_REGEX='.*\.[ch]$'
 readonly C_LOCKFILE_REGEX='.*\.#.+\.[ch]$'
-readonly DIRS='"src" "include" "test"'
+readonly DIRS='"src" "include" "demos"'
 
 readonly SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
