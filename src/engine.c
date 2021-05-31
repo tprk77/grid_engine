@@ -288,8 +288,10 @@ static ge_color_t pixel_grayscale(uint8_t pixel_value)
 static uint32_t pixel_rbga(ge_color_t pixel_color)
 {
   // Assumes texture format is SDL_PIXELFORMAT_RGBA8888
-  return ((pixel_color.red << RGBA_R_SHIFT) | (pixel_color.green << RGBA_G_SHIFT)
-          | (pixel_color.blue << RGBA_B_SHIFT) | (255 << RGBA_A_SHIFT));
+  return ((((uint32_t) pixel_color.red) << RGBA_R_SHIFT)      //
+          | (((uint32_t) pixel_color.green) << RGBA_G_SHIFT)  //
+          | (((uint32_t) pixel_color.blue) << RGBA_B_SHIFT)   //
+          | (((uint32_t) 255) << RGBA_A_SHIFT));
 }
 
 #undef RGBA_R_SHIFT
