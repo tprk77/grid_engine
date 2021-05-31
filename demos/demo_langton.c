@@ -122,5 +122,8 @@ int main(void)
       .event_func = NULL,
   };
   // RUN THE LOOP!
-  return ge_ez_loop(&ez_loop_data);
+  const int result = ge_ez_loop(&ez_loop_data);
+  ge_grid_free(grid);
+  ge_grid_free(user_data.temp_grid);
+  return result;
 }
