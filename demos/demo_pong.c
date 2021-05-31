@@ -481,6 +481,9 @@ void process_ball(ge_grid_t* grid, user_data_t* user_data)
 void process_bounces(ge_grid_t* grid, user_data_t* user_data)
 {
   // Check for bounces with the paddles, bumpers, etc
+  if (user_data->ball_heading == HEADING_NONE) {
+    return;
+  }
   const ge_coord_t neighbor_north = ge_coord_add(user_data->ball_coord, (ge_coord_t){0, -1});
   const ge_coord_t neighbor_east = ge_coord_add(user_data->ball_coord, (ge_coord_t){1, 0});
   const ge_coord_t neighbor_south = ge_coord_add(user_data->ball_coord, (ge_coord_t){0, 1});
@@ -630,5 +633,7 @@ int main(void)
       .event_func = pong_event_func,
   };
   // RUN THE LOOP!
-  return ge_ez_loop(&ez_loop_data);
+  const int result = ge_ez_loop(&ez_loop_data);
+  ge_grid_free(grid);
+  return result;
 }
