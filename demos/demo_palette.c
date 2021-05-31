@@ -13,9 +13,9 @@ int main(void)
   ge_palette_t palette = GE_PALETTE_INFERNO;
   // Fill the grid with a gradient
   for (size_t x = 0; x < width; ++x) {
-      for (size_t y = 0; y < height; ++y) {
-          ge_grid_set_coord(grid, (ge_coord_t){x, y}, x);
-      }
+    for (size_t y = 0; y < height; ++y) {
+      ge_grid_set_coord(grid, (ge_coord_t){x, y}, x);
+    }
   }
   // The EZ loop data
   ez_loop_data_t ez_loop_data = {
@@ -26,5 +26,7 @@ int main(void)
       .event_func = NULL,
   };
   // RUN THE LOOP!
-  return ge_ez_loop(&ez_loop_data);
+  const int result = ge_ez_loop(&ez_loop_data);
+  ge_grid_free(grid);
+  return result;
 }
