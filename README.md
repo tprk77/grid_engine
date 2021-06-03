@@ -213,14 +213,14 @@ access will occur and the program will abort.
 
 The second function simply clears the grid by setting all pixels to zero.
 
-**`ge_neighbor_res_t ge_grid_get_neighbors(const ge_grid_t* grid, ge_coord_t coord);`**<br>
-**`ge_neighbor_res_t ge_grid_get_neighbors_wrapped(const ge_grid_t* grid, ge_coord_t coord);`**
+**`ge_neighbors_t ge_grid_get_neighbors8(const ge_grid_t* grid, ge_coord_t coord);`**<br>
+**`ge_neighbors_t ge_grid_get_neighbors8_wrapped(const ge_grid_t* grid, ge_coord_t coord);`**
 
 ```
-typedef struct ge_neighbor_res {
+typedef struct ge_neighbors {
   size_t num_neighbors;
   ge_coord_t neighbors[GE_MAX_NUM_NEIGHBORS];
-} ge_neighbor_res_t;
+} ge_neighbors_t;
 ```
 
 These functions return the coordinates of the neighbors of a pixel. The
@@ -316,10 +316,10 @@ the grid, and count the number of live neighboring cells:
 
 ```
       const bool is_live = (ge_grid_get_coord(grid, coord) != 0);
-      const ge_neighbor_res_t neighbor_res = ge_grid_get_neighbors_wrapped(grid, coord);
+      const ge_neighbors_t neighbors = ge_grid_get_neighbors_wrapped(grid, coord);
       size_t num_live_neighbors = 0;
-      for (size_t kk = 0; kk < neighbor_res.num_neighbors; ++kk) {
-        if (ge_grid_get_coord(grid, neighbor_res.neighbors[kk])) {
+      for (size_t kk = 0; kk < neighbors.num_neighbors; ++kk) {
+        if (ge_grid_get_coord(grid, neighbors.neighbors[kk])) {
           ++num_live_neighbors;
         }
       }

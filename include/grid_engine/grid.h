@@ -15,10 +15,10 @@
 
 typedef struct ge_grid ge_grid_t;
 
-typedef struct ge_neighbor_res {
+typedef struct ge_neighbors {
   size_t num_neighbors;
   ge_coord_t neighbors[GE_MAX_NUM_NEIGHBORS];
-} ge_neighbor_res_t;
+} ge_neighbors_t;
 
 ge_grid_t* ge_grid_create(size_t width, size_t height);
 void ge_grid_free(ge_grid_t* grid);
@@ -33,7 +33,9 @@ uint8_t ge_grid_get_coord(const ge_grid_t* grid, ge_coord_t coord);
 void ge_grid_set_coord(ge_grid_t* grid, ge_coord_t coord, uint8_t value);
 uint8_t ge_grid_get_coord_wrapped(const ge_grid_t* grid, ge_coord_t coord);
 void ge_grid_set_coord_wrapped(ge_grid_t* grid, ge_coord_t coord, uint8_t value);
-ge_neighbor_res_t ge_grid_get_neighbors(const ge_grid_t* grid, ge_coord_t coord);
-ge_neighbor_res_t ge_grid_get_neighbors_wrapped(const ge_grid_t* grid, ge_coord_t coord);
+ge_neighbors_t ge_grid_get_neighbors4(const ge_grid_t* grid, ge_coord_t coord);
+ge_neighbors_t ge_grid_get_neighbors4_wrapped(const ge_grid_t* grid, ge_coord_t coord);
+ge_neighbors_t ge_grid_get_neighbors8(const ge_grid_t* grid, ge_coord_t coord);
+ge_neighbors_t ge_grid_get_neighbors8_wrapped(const ge_grid_t* grid, ge_coord_t coord);
 
 #endif  // GE_GRID_H_
