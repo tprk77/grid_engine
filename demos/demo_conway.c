@@ -50,10 +50,10 @@ void conway_loop_func(ge_grid_t* grid, void* user_data_, uint32_t time_ms)
     for (size_t ii = 0; ii < width; ++ii) {
       const ge_coord_t coord = (ge_coord_t){ii, jj};
       const bool is_live = (ge_grid_get_coord(grid, coord) != 0);
-      const ge_neighbor_res_t neighbor_res = ge_grid_get_neighbors_wrapped(grid, coord);
+      const ge_neighbors_t neighbors = ge_grid_get_neighbors8_wrapped(grid, coord);
       size_t num_live_neighbors = 0;
-      for (size_t kk = 0; kk < neighbor_res.num_neighbors; ++kk) {
-        if (ge_grid_get_coord(grid, neighbor_res.neighbors[kk])) {
+      for (size_t kk = 0; kk < neighbors.num_neighbors; ++kk) {
+        if (ge_grid_get_coord(grid, neighbors.neighbors[kk])) {
           ++num_live_neighbors;
         }
       }
