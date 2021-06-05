@@ -213,15 +213,8 @@ access will occur and the program will abort.
 
 The second function simply clears the grid by setting all pixels to zero.
 
-**`ge_neighbors_t ge_grid_get_neighbors8(const ge_grid_t* grid, ge_coord_t coord);`**<br>
-**`ge_neighbors_t ge_grid_get_neighbors8_wrapped(const ge_grid_t* grid, ge_coord_t coord);`**
-
-```
-typedef struct ge_neighbors {
-  size_t num_neighbors;
-  ge_coord_t neighbors[GE_MAX_NUM_NEIGHBORS];
-} ge_neighbors_t;
-```
+**`ge_neighbors_t ge_grid_get_neighbors(const ge_grid_t* grid, ge_coord_t coord);`**<br>
+**`ge_neighbors_t ge_grid_get_neighbors_wrapped(const ge_grid_t* grid, ge_coord_t coord);`**
 
 These functions return the coordinates of the neighbors of a pixel. The
 neighbors of a pixel are defined to be the eight pixels surrounding it. The
