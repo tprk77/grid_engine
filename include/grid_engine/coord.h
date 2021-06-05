@@ -36,5 +36,7 @@ ge_coord_t ge_coord_mul(ge_coord_t coord, ptrdiff_t scalar);
 ge_coord_t ge_coord_div(ge_coord_t coord, ptrdiff_t scalar);
 ge_coord_t ge_coord_clamp(ge_coord_t coord, size_t width, size_t height);
 ge_coord_t ge_coord_wrap(ge_coord_t coord, size_t width, size_t height);
+bool ge_coord_equals(ge_coord_t coord, ge_coord_t other_coord);
+bool ge_coord_is_invalid(ge_coord_t coord);
 
 #endif  // GE_COORD_H_
