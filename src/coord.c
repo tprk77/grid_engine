@@ -49,6 +49,16 @@ ge_coord_t ge_coord_wrap(ge_coord_t coord, size_t width, size_t height)
   };
 }
 
+bool ge_coord_equals(ge_coord_t coord, ge_coord_t other_coord)
+{
+  return (coord.x == other_coord.x && coord.y == other_coord.y);
+}
+
+bool ge_coord_is_invalid(ge_coord_t coord)
+{
+  return ge_coord_equals(coord, GE_INVALID_COORD);
+}
+
 static ptrdiff_t pd_min(ptrdiff_t a, ptrdiff_t b)
 {
   return (a < b ? a : b);
