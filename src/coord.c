@@ -9,6 +9,8 @@ static ptrdiff_t pd_min(ptrdiff_t a, ptrdiff_t b);
 static ptrdiff_t pd_max(ptrdiff_t a, ptrdiff_t b);
 static ptrdiff_t pd_mod(ptrdiff_t a, ptrdiff_t b);
 
+const ge_coord_t GE_INVALID_COORD = GE_INVALID_COORD_K;
+
 ge_coord_t ge_coord_add(ge_coord_t coord, ge_coord_t other)
 {
   return (ge_coord_t){coord.x + other.x, coord.y + other.y};
