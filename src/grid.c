@@ -18,31 +18,6 @@ typedef struct ge_grid {
 
 static void abort_on_out_of_bounds(const ge_grid_t* grid, ge_coord_t coord);
 
-// Counterclockwise around the unit circle, i.e., 0°, 90°, 180°, etc
-static const ge_coord_t GE_NEIGHBORS4_OFFSETS[4] = {
-    {1, 0},   //
-    {0, 1},   //
-    {-1, 0},  //
-    {0, -1},  //
-};
-
-// Counterclockwise around the unit circle, i.e., 0°, 45°, 90°, etc
-static const ge_coord_t GE_NEIGHBORS8_OFFSETS[8] = {
-    {1, 0},    //
-    {1, 1},    //
-    {0, 1},    //
-    {-1, 1},   //
-    {-1, 0},   //
-    {-1, -1},  //
-    {0, -1},   //
-    {1, -1},   //
-};
-
-static const ge_neighbors_t GE_NEIGHBORS_DEFAULTS = {
-    .num_neighbors = 0,
-    .neighbors = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}},
-};
-
 ge_grid_t* ge_grid_create(size_t width, size_t height)
 {
   ge_grid_t* grid = calloc(1, sizeof(ge_grid_t));
@@ -138,50 +113,16 @@ void ge_grid_set_coord_wrapped(ge_grid_t* grid, ge_coord_t coord, uint8_t value)
   ge_grid_set_coord(grid, coord, value);
 }
 
-ge_neighbors_t ge_grid_get_neighbors4(const ge_grid_t* grid, ge_coord_t coord)
+ge_neighbors_t ge_grid_get_neighbors(const ge_grid_t* grid, ge_coord_t coord)
 {
-  ge_neighbors_t result = GE_NEIGHBORS_DEFAULTS;
-  for (size_t ii = 0; ii < 4; ++ii) {
-    ge_coord_t nbr_coord = ge_coord_add(coord, GE_NEIGHBORS4_OFFSETS[ii]);
-    if (!ge_grid_has_coord(grid, nbr_coord)) {
-      continue;
-    }
-    result.neighbors[result.num_neighbors++] = nbr_coord;
-  }
-  return result;
+  abort_on_out_of_bounds(grid, coord);
+  return ge_neighbors_from_coord_inside(coord, grid->width, grid->height);
 }
 
-ge_neighbors_t ge_grid_get_neighbors4_wrapped(const ge_grid_t* grid, ge_coord_t coord)
+ge_neighbors_t ge_grid_get_neighbors_wrapped(const ge_grid_t* grid, ge_coord_t coord)
 {
-  ge_neighbors_t result = GE_NEIGHBORS_DEFAULTS;
-  for (size_t ii = 0; ii < 4; ++ii) {
-    ge_coord_t nbr_coord = ge_coord_add(coord, GE_NEIGHBORS4_OFFSETS[ii]);
-    result.neighbors[result.num_neighbors++] = ge_coord_wrap(nbr_coord, grid->width, grid->height);
-  }
-  return result;
-}
-
-ge_neighbors_t ge_grid_get_neighbors8(const ge_grid_t* grid, ge_coord_t coord)
-{
-  ge_neighbors_t result = GE_NEIGHBORS_DEFAULTS;
-  for (size_t ii = 0; ii < 8; ++ii) {
-    ge_coord_t nbr_coord = ge_coord_add(coord, GE_NEIGHBORS8_OFFSETS[ii]);
-    if (!ge_grid_has_coord(grid, nbr_coord)) {
-      continue;
-    }
-    result.neighbors[result.num_neighbors++] = nbr_coord;
-  }
-  return result;
-}
-
-ge_neighbors_t ge_grid_get_neighbors8_wrapped(const ge_grid_t* grid, ge_coord_t coord)
-{
-  ge_neighbors_t result = GE_NEIGHBORS_DEFAULTS;
-  for (size_t ii = 0; ii < 8; ++ii) {
-    ge_coord_t nbr_coord = ge_coord_add(coord, GE_NEIGHBORS8_OFFSETS[ii]);
-    result.neighbors[result.num_neighbors++] = ge_coord_wrap(nbr_coord, grid->width, grid->height);
-  }
-  return result;
+  abort_on_out_of_bounds(grid, coord);
+  return ge_neighbors_from_coord_wrapped(coord, grid->width, grid->height);
 }
 
 static void abort_on_out_of_bounds(const ge_grid_t* grid, ge_coord_t coord)
