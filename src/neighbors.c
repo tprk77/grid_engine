@@ -72,13 +72,16 @@ ge_coord_t ge_neighbors_get_neighbor(const ge_neighbors_t* neighbors, ge_directi
   return neighbors->neighbors[direction];
 }
 
-size_t ge_neighbors_next_index(const ge_neighbors_t* neighbors, size_t index) {
-  for (++index; index < GE_MAX_NUM_NEIGHBORS; ++index) {
-    if (ge_neighbors_has_neighbor(neighbors, index)) {
-      break;
-    }
+const ge_coord_t* ge_neighbors_next_coord(const ge_neighbors_t* neighbors,
+                                          const ge_coord_t* prev_coord)
+{
+  const ge_coord_t* const begin_coord = neighbors->neighbors;
+  const ge_coord_t* const end_coord = neighbors->neighbors + GE_MAX_NUM_NEIGHBORS;
+  const ge_coord_t* coord = (prev_coord == NULL ? begin_coord : prev_coord + 1);
+  while (coord < end_coord && ge_coord_is_invalid(*coord)) {
+    ++prev_coord;
   }
-  return index;
+  return (coord != end_coord ? coord : NULL);
 }
 
 ge_coord_t ge_neighbors_get_offset(ge_direction_t direction)

@@ -34,7 +34,29 @@ ge_neighbors_t ge_neighbors_from_coord_inside(ge_coord_t coord, size_t width, si
 ge_neighbors_t ge_neighbors_from_coord_wrapped(ge_coord_t coord, size_t width, size_t height);
 bool ge_neighbors_has_neighbor(const ge_neighbors_t* neighbors, ge_direction_t direction);
 ge_coord_t ge_neighbors_get_neighbor(const ge_neighbors_t* neighbors, ge_direction_t direction);
-size_t ge_neighbors_next_index(const ge_neighbors_t* neighbors, size_t index);
+
+/**
+ * Used to iterate through a set of neighboring coords. If `prev_coord` is
+ * `NULL`, this function will return the first coord in the set. If `prev_coord`
+ * is the last coord in the set, the result will be `NULL`. Intended to be used
+ * with a while loop, similarly to this:
+ *
+ * ```
+ * const ge_coord_t* nbr_coord = NULL;
+ * while ((nbr_coord = ge_neighbors_next_coord(&nbrs, nbr_coord)) != NULL) {
+ *   ...
+ * }
+ * ```
+ *
+ * @param neighbors The set of neighboring coords.
+ *
+ * @param prev_coord The previous coord, or `NULL` if there wasn't one.
+ *
+ * @return The next coord in the set, or `NULL` if there isn't one.
+ */
+const ge_coord_t* ge_neighbors_next_coord(const ge_neighbors_t* neighbors,
+                                          const ge_coord_t* prev_coord);
+
 ge_coord_t ge_neighbors_get_offset(ge_direction_t direction);
 
 #endif  // GE_NEIGHBORS_H_
