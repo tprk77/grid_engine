@@ -11,7 +11,7 @@
 
 #include "grid_engine/coord.h"
 
-#define GE_MAX_NUM_NEIGHBORS 8
+#define GE_NUM_DIRECTIONS 8
 
 typedef enum ge_direction {
   GE_DIRECTION_NORTH = 0,
@@ -27,8 +27,11 @@ typedef enum ge_direction {
 } ge_direction_t;
 
 typedef struct ge_neighbors {
-  ge_coord_t neighbors[GE_MAX_NUM_NEIGHBORS];
+  ge_coord_t neighbors[GE_NUM_DIRECTIONS];
 } ge_neighbors_t;
+
+ge_direction_t ge_direction_get_opposite(ge_direction_t direction);
+ge_coord_t ge_direction_get_offset(ge_direction_t direction);
 
 ge_neighbors_t ge_neighbors_from_coord(ge_coord_t coord);
 ge_neighbors_t ge_neighbors_from_coord_inside(ge_coord_t coord, size_t width, size_t height);
@@ -57,7 +60,5 @@ ge_coord_t ge_neighbors_get_neighbor(const ge_neighbors_t* neighbors, ge_directi
  */
 const ge_coord_t* ge_neighbors_next_coord(const ge_neighbors_t* neighbors,
                                           const ge_coord_t* prev_coord);
-
-ge_coord_t ge_neighbors_get_offset(ge_direction_t direction);
 
 #endif  // GE_NEIGHBORS_H_

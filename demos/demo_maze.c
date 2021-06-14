@@ -286,7 +286,7 @@ void maze_grid_recursive_backtracker(maze_grid_t* mgrid)
     // If all cells have been visited, pop the stack to backtrack
     if (num_unvisited == 0) {
       const ge_direction_t pop_direction = dir_stack[--dir_stack_size];
-      coord = ge_coord_sub(coord, ge_neighbors_get_offset(pop_direction));
+      coord = ge_coord_sub(coord, ge_direction_get_offset(pop_direction));
       continue;
     }
     // Otherwise, pick a random direction, push onto the stack
@@ -295,7 +295,7 @@ void maze_grid_recursive_backtracker(maze_grid_t* mgrid)
     const uint8_t nxt_value = maze_value_add_connection(prv_value, unvisited_conval);
     maze_grid_set_coord(mgrid, coord, nxt_value);
     const ge_direction_t unvisited_direction = MAZE_CONVAL_TO_DIRECTION[unvisited_conval];
-    coord = ge_coord_add(coord, ge_neighbors_get_offset(unvisited_direction));
+    coord = ge_coord_add(coord, ge_direction_get_offset(unvisited_direction));
     dir_stack[dir_stack_size++] = unvisited_direction;
   }
   // Cleanup once done
