@@ -14,7 +14,6 @@
 #define GE_MAX_NUM_NEIGHBORS 8
 
 typedef enum ge_direction {
-  GE_DIRECTION_NONE = -1,
   GE_DIRECTION_NORTH = 0,
   GE_DIRECTION_NORTHEAST,
   GE_DIRECTION_EAST,
@@ -23,6 +22,8 @@ typedef enum ge_direction {
   GE_DIRECTION_SOUTHWEST,
   GE_DIRECTION_WEST,
   GE_DIRECTION_NORTHWEST,
+  GE_DIRECTION_NONE,  // Special value to indicate no direction
+  GE_DIRECTION_ALL,   // Special value to indicate all directions
 } ge_direction_t;
 
 typedef struct ge_neighbors {

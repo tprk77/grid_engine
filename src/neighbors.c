@@ -9,7 +9,6 @@
 
 #include "grid_engine/log.h"
 
-static void abort_on_invalid_coord(ge_coord_t coord);
 static bool coord_inside(ge_coord_t coord, size_t width, size_t height);
 
 static const ge_coord_t GE_NEIGHBOR_OFFSETS[GE_MAX_NUM_NEIGHBORS] = {
@@ -63,12 +62,31 @@ ge_neighbors_t ge_neighbors_from_coord_wrapped(ge_coord_t coord, size_t width, s
 
 bool ge_neighbors_has_neighbor(const ge_neighbors_t* neighbors, ge_direction_t direction)
 {
+  if (direction == GE_DIRECTION_NONE || direction == GE_DIRECTION_ALL) {
+    const ge_coord_t* const begin_coord = neighbors->neighbors;
+    const ge_coord_t* const end_coord = neighbors->neighbors + GE_MAX_NUM_NEIGHBORS;
+    for (const ge_coord_t* nbr_coord = begin_coord; nbr_coord < end_coord; ++nbr_coord) {
+      const bool has_neighbor = !ge_coord_is_invalid(*nbr_coord);
+      if ((direction == GE_DIRECTION_NONE && has_neighbor)
+          || (direction == GE_DIRECTION_ALL && !has_neighbor)) {
+        return false;
+      }
+    }
+    return true;
+  }
   return !ge_coord_is_invalid(neighbors->neighbors[direction]);
 }
 
 ge_coord_t ge_neighbors_get_neighbor(const ge_neighbors_t* neighbors, ge_direction_t direction)
 {
-  abort_on_invalid_coord(neighbors->neighbors[direction]);
+  if (direction == GE_DIRECTION_NONE || direction == GE_DIRECTION_ALL) {
+    GE_LOG_ERROR("Cannot get neighbor with special dirction ALL or NONE!");
+    abort();
+  }
+  if (ge_coord_is_invalid(neighbors->neighbors[direction])) {
+    GE_LOG_ERROR("Neighbor does not exist for direction");
+    abort();
+  }
   return neighbors->neighbors[direction];
 }
 
@@ -86,15 +104,11 @@ const ge_coord_t* ge_neighbors_next_coord(const ge_neighbors_t* neighbors,
 
 ge_coord_t ge_neighbors_get_offset(ge_direction_t direction)
 {
-  return GE_NEIGHBOR_OFFSETS[direction];
-}
-
-static void abort_on_invalid_coord(ge_coord_t coord)
-{
-  if (ge_coord_is_invalid(coord)) {
-    GE_LOG_ERROR("Coord is invalid!");
+  if (direction == GE_DIRECTION_NONE || direction == GE_DIRECTION_ALL) {
+    GE_LOG_ERROR("Cannot get offset for special direction ALL or NONE!");
     abort();
   }
+  return GE_NEIGHBOR_OFFSETS[direction];
 }
 
 static bool coord_inside(ge_coord_t coord, size_t width, size_t height)
