@@ -26,17 +26,11 @@ typedef struct ge_engine {
   bool should_quit;
 } ge_engine_t;
 
-// clang-format off
-#define GE_ENGINE_DEFAULTS_K { \
-    .inited = false, \
-    .grid = NULL, \
-    .palette = NULL, \
-    .gfx_opts = GE_GFX_OPTS_DEFAULTS_K, \
-    .has_window = false, \
-    .sdl_window = NULL, \
-    .should_quit = false, \
-}
-// clang-format on
+#define GE_ENGINE_DEFAULTS_K                                                            \
+  {                                                                                     \
+    .inited = false, .grid = NULL, .palette = NULL, .gfx_opts = GE_GFX_OPTS_DEFAULTS_K, \
+    .has_window = false, .sdl_window = NULL, .should_quit = false,                      \
+  }
 
 const ge_gfx_opts_t GE_GFX_OPTS_DEFAULTS = GE_GFX_OPTS_DEFAULTS_K;
 static const ge_engine_t GE_ENGINE_DEFAULTS = GE_ENGINE_DEFAULTS_K;

@@ -21,12 +21,10 @@ typedef struct ge_gfx_opts {
   const char* window_name;
 } ge_gfx_opts_t;
 
-// clang-format off
-#define GE_GFX_OPTS_DEFAULTS_K { \
-    .pixel_multiplier = 8, \
-    .window_name = "Grid Engine", \
-}
-// clang-format on
+#define GE_GFX_OPTS_DEFAULTS_K                           \
+  {                                                      \
+    .pixel_multiplier = 8, .window_name = "Grid Engine", \
+  }
 
 extern const ge_gfx_opts_t GE_GFX_OPTS_DEFAULTS;
 

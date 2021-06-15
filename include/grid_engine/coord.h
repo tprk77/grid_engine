@@ -21,12 +21,10 @@ typedef struct ge_coord {
   ptrdiff_t y;
 } ge_coord_t;
 
-// clang-format off
-#define GE_INVALID_COORD_K { \
-    .x = PTRDIFF_MIN, \
-    .y = PTRDIFF_MIN, \
-}
-// clang-format on
+#define GE_INVALID_COORD_K              \
+  {                                     \
+    .x = PTRDIFF_MIN, .y = PTRDIFF_MIN, \
+  }
 
 extern const ge_coord_t GE_INVALID_COORD;
 
