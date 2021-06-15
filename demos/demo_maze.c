@@ -12,6 +12,8 @@ typedef struct maze_grid {
   ge_grid_t* render_grid;
 } maze_grid_t;
 
+#define NUM_MAZE_CONVALS 4
+
 typedef enum maze_conval {
   MAZE_CONVAL_NORTH = 0,
   MAZE_CONVAL_EAST,
@@ -21,27 +23,11 @@ typedef enum maze_conval {
   MAZE_CONVAL_ALL,   // Special value to indicate all connections
 } maze_conval_t;
 
-#define NUM_MAZE_CONVALS 4
-
 static const maze_conval_t MAZE_CONVALS[NUM_MAZE_CONVALS] = {
     MAZE_CONVAL_NORTH,
     MAZE_CONVAL_EAST,
     MAZE_CONVAL_SOUTH,
     MAZE_CONVAL_WEST,
-};
-
-static const maze_conval_t MAZE_CONVAL_TO_OPPOSITE[NUM_MAZE_CONVALS] = {
-    MAZE_CONVAL_SOUTH,
-    MAZE_CONVAL_WEST,
-    MAZE_CONVAL_NORTH,
-    MAZE_CONVAL_EAST,
-};
-
-static const ge_direction_t MAZE_CONVAL_TO_DIRECTION[NUM_MAZE_CONVALS] = {
-    GE_DIRECTION_NORTH,
-    GE_DIRECTION_EAST,
-    GE_DIRECTION_SOUTH,
-    GE_DIRECTION_WEST,
 };
 
 #define MAZE_CONVAL_BIT_MASK ((uint8_t) 0x0F)
@@ -58,17 +44,21 @@ static const uint8_t MAZE_CONVAL_TO_BITS[NUM_MAZE_CONVALS] = {
     MAZE_CONVAL_WEST_BIT,
 };
 
-#define MAZE_CONVAL_NORTH_OFFSET ((ge_coord_t){0, -1})
-#define MAZE_CONVAL_EAST_OFFSET ((ge_coord_t){1, 0})
-#define MAZE_CONVAL_SOUTH_OFFSET ((ge_coord_t){0, 1})
-#define MAZE_CONVAL_WEST_OFFSET ((ge_coord_t){-1, 0})
-
-static const ge_coord_t MAZE_CONVAL_TO_OFFSET[NUM_MAZE_CONVALS] = {
-    MAZE_CONVAL_NORTH_OFFSET,
-    MAZE_CONVAL_EAST_OFFSET,
-    MAZE_CONVAL_SOUTH_OFFSET,
-    MAZE_CONVAL_WEST_OFFSET,
+static const maze_conval_t MAZE_CONVAL_TO_OPPOSITE[NUM_MAZE_CONVALS] = {
+    MAZE_CONVAL_SOUTH,
+    MAZE_CONVAL_WEST,
+    MAZE_CONVAL_NORTH,
+    MAZE_CONVAL_EAST,
 };
+
+static const ge_direction_t MAZE_CONVAL_TO_DIRECTION[NUM_MAZE_CONVALS] = {
+    GE_DIRECTION_NORTH,
+    GE_DIRECTION_EAST,
+    GE_DIRECTION_SOUTH,
+    GE_DIRECTION_WEST,
+};
+
+#define NUM_MAZE_PATHVALS 4
 
 typedef enum maze_pathval {
   MAZE_PATHVAL_UNVISITED = 0,
@@ -76,8 +66,6 @@ typedef enum maze_pathval {
   MAZE_PATHVAL_EDGE,
   MAZE_PATHVAL_VISITED,
 } maze_pathval_t;
-
-#define NUM_MAZE_PATHVALS 4
 
 #define MAZE_PATHVAL_BIT_MASK ((uint8_t) 0x30)
 #define MAZE_PATHVAL_BIT_OFFSET ((uint8_t) 4)
@@ -219,7 +207,8 @@ void maze_grid_set_coord(maze_grid_t* mgrid, ge_coord_t coord, uint8_t value)
     if (!added_conval && !removed_conval) {
       continue;
     }
-    const ge_coord_t nbr_coord = ge_coord_add(coord, MAZE_CONVAL_TO_OFFSET[conval]);
+    const ge_coord_t nbr_offset = ge_direction_get_offset(MAZE_CONVAL_TO_DIRECTION[conval]);
+    const ge_coord_t nbr_coord = ge_coord_add(coord, nbr_offset);
     if (!ge_grid_has_coord(mgrid->logic_grid, nbr_coord)) {
       continue;
     }
@@ -233,7 +222,8 @@ void maze_grid_set_coord(maze_grid_t* mgrid, ge_coord_t coord, uint8_t value)
   const ge_coord_t render_coord = {2 * coord.x + 1, 2 * coord.y + 1};
   for (size_t ii = 0; ii < NUM_MAZE_CONVALS; ++ii) {
     const maze_conval_t conval = MAZE_CONVALS[ii];
-    const ge_coord_t nbr_coord = ge_coord_add(render_coord, MAZE_CONVAL_TO_OFFSET[conval]);
+    const ge_coord_t nbr_offset = ge_direction_get_offset(MAZE_CONVAL_TO_DIRECTION[conval]);
+    const ge_coord_t nbr_coord = ge_coord_add(render_coord, nbr_offset);
     const uint8_t nbr_value = (maze_value_has_connection(value, conval) ? 255 : 0);
     ge_grid_set_coord(mgrid->render_grid, nbr_coord, nbr_value);
   }
@@ -258,14 +248,14 @@ void maze_grid_recursive_backtracker(maze_grid_t* mgrid)
   // Pick a random point to start
   const ge_coord_t start_coord = {rand() % width, rand() % height};
   // Set up the stack for backtracking
-  const size_t dir_stack_capacity = width * height;
-  uint8_t* const dir_stack = calloc(dir_stack_capacity, sizeof(uint8_t));
-  size_t dir_stack_size = 0;
+  const size_t conval_stack_capacity = width * height;
+  uint8_t* const conval_stack = calloc(conval_stack_capacity, sizeof(uint8_t));
+  size_t conval_stack_size = 0;
   // Initialize the stack with the first element
   ge_coord_t coord = start_coord;
-  dir_stack[dir_stack_size++] = GE_DIRECTION_NONE;
+  conval_stack[conval_stack_size++] = MAZE_CONVAL_NORTH;
   // Work through the entire stack
-  while (dir_stack_size != 0) {
+  while (conval_stack_size != 0) {
     // Check neighbors for unvisited connections
     const ge_neighbors_t nbrs = ge_grid_get_neighbors(mgrid->logic_grid, coord);
     maze_conval_t unvisited_convals[NUM_MAZE_CONVALS];
@@ -285,8 +275,9 @@ void maze_grid_recursive_backtracker(maze_grid_t* mgrid)
     }
     // If all cells have been visited, pop the stack to backtrack
     if (num_unvisited == 0) {
-      const ge_direction_t pop_direction = dir_stack[--dir_stack_size];
-      coord = ge_coord_sub(coord, ge_direction_get_offset(pop_direction));
+      const maze_conval_t pop_conval = conval_stack[--conval_stack_size];
+      const ge_coord_t pop_offset = ge_direction_get_offset(MAZE_CONVAL_TO_DIRECTION[pop_conval]);
+      coord = ge_coord_sub(coord, pop_offset);
       continue;
     }
     // Otherwise, pick a random direction, push onto the stack
@@ -294,12 +285,13 @@ void maze_grid_recursive_backtracker(maze_grid_t* mgrid)
     const uint8_t prv_value = maze_grid_get_coord(mgrid, coord);
     const uint8_t nxt_value = maze_value_add_connection(prv_value, unvisited_conval);
     maze_grid_set_coord(mgrid, coord, nxt_value);
-    const ge_direction_t unvisited_direction = MAZE_CONVAL_TO_DIRECTION[unvisited_conval];
-    coord = ge_coord_add(coord, ge_direction_get_offset(unvisited_direction));
-    dir_stack[dir_stack_size++] = unvisited_direction;
+    const ge_coord_t unvisited_offset =
+        ge_direction_get_offset(MAZE_CONVAL_TO_DIRECTION[unvisited_conval]);
+    coord = ge_coord_add(coord, unvisited_offset);
+    conval_stack[conval_stack_size++] = unvisited_conval;
   }
   // Cleanup once done
-  free(dir_stack);
+  free(conval_stack);
 }
 
 int main(void)
