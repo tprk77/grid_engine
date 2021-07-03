@@ -71,4 +71,18 @@ extern const ge_coord_t GE_GLYPH_7[20];
 extern const ge_coord_t GE_GLYPH_8[28];
 extern const ge_coord_t GE_GLYPH_9[24];
 
+/**
+ * Get some glyph coords, if they exist.
+ *
+ * Glyphs are always 8x8 and monospaced (that happened to be the font I picked). Supported
+ * characters are 'A' to 'Z', 'a' to 'z', and '0' to '9'.
+ */
+bool ge_glyph_get(char glyph, const ge_coord_t** glyph_coords, size_t* glyph_size);
+
+/**
+ * Get an array of coords corresponding to a string of glyphs.
+ */
+size_t ge_glyph_get_str_coords(const char* str, ge_coord_t start_coord, ge_coord_t* output_coords,
+                               size_t max_num_coords);
+
 #endif  // GE_GLYPHS_H_

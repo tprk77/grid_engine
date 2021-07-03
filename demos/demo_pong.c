@@ -391,7 +391,8 @@ void draw_score(ge_grid_t* grid, ge_coord_t score_coord, size_t score)
   static char score_str[10];
   // Cap the score at 99 for display purposes, and just do a rollover
   snprintf(score_str, 10, "%u", (unsigned int) (score % 100));
-  const size_t num_coords = ge_utils_str_coords(score_str, score_coord, score_coord_buffer, 500);
+  const size_t num_coords =
+      ge_glyph_get_str_coords(score_str, score_coord, score_coord_buffer, 500);
   for (size_t ii = 0; ii < num_coords; ++ii) {
     const ge_coord_t glyph_coord = score_coord_buffer[ii];
     ge_grid_set_coord_wrapped(grid, glyph_coord, VALUE_FADE);
