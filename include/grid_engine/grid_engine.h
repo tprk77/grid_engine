@@ -8,6 +8,7 @@
 
 #include "grid_engine/engine.h"
 #include "grid_engine/ez_loop.h"
+#include "grid_engine/glyphs.h"
 #include "grid_engine/log.h"
 #include "grid_engine/utils.h"
 
