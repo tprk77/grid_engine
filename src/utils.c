@@ -131,6 +131,26 @@ bool ge_coord_vec_reserve(ge_coord_vec_t* coord_vec, size_t capacity)
   return true;
 }
 
+ge_coord_t* ge_coord_vec_begin(ge_coord_vec_t* coord_vec)
+{
+  return coord_vec->coord_buffer;
+}
+
+ge_coord_t* ge_coord_vec_end(ge_coord_vec_t* coord_vec)
+{
+  return coord_vec->coord_buffer + coord_vec->size;
+}
+
+const ge_coord_t* ge_coord_vec_cbegin(const ge_coord_vec_t* coord_vec)
+{
+  return coord_vec->coord_buffer;
+}
+
+const ge_coord_t* ge_coord_vec_cend(const ge_coord_vec_t* coord_vec)
+{
+  return coord_vec->coord_buffer + coord_vec->size;
+}
+
 static bool ge_coord_vec_grow_capacity(ge_coord_vec_t* coord_vec, size_t min_size)
 {
   const size_t capacity =  //
