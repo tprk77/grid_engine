@@ -29,6 +29,16 @@ ifeq ($(IS_WIN), t)
   vpath %.dll $(MINGW_BIN_DIR)
 endif
 
+# RELEASE, DEBUG, and SANITIZE variables can be overriden on the command line,
+# and should be specified as "t", "true", "T", "TRUE", or "1" for a true value.
+# Any other value will be considered at a false value.
+RELEASE ?= t
+IS_RELEASE := $(filter t true T TRUE 1,$(RELEASE))
+DEBUG ?= $(if $(IS_RELEASE),f,t)
+IS_DEBUG := $(filter t true T TRUE 1,$(DEBUG))
+SANITIZE ?= $(if $(IS_RELEASE),f,t)
+IS_SANITIZE := $(filter t true T TRUE 1,$(SANITIZE))
+
 ##########
 # COMMON #
 ##########
@@ -39,8 +49,9 @@ all:
 CP := cp
 MKDIR := mkdir
 
-DEBUG := -O0 -g
-CFLAGS := -std=c11 -Wall -Wextra -Werror -fPIC $(DEBUG) $(CFLAGS)
+DEBUG_FLAGS := $(if $(IS_DEBUG),-O0 -g,)
+SANITIZE_FLAGS := $(if $(IS_SANITIZE),-fsanitize=address -fsanitize=leak -fsanitize=undefined,)
+CFLAGS := $(filter %,-std=c11 -Wall -Wextra -Werror -fPIC $(DEBUG_FLAGS) $(SANITIZE_FLAGS) $(CFLAGS))
 LDFLAGS := -static-libgcc
 
 # Usage: $(call make-depend,src,obj,dep)
