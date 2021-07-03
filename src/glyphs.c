@@ -609,15 +609,17 @@ bool ge_glyph_get(char glyph, const ge_coord_t** glyph_coords, size_t* glyph_siz
   return (*glyph_coords != NULL);
 }
 
-size_t ge_glyph_get_str_coords(const char* str, ge_coord_t start_coord, ge_coord_t* output_coords,
-                               size_t max_num_coords)
+ge_coord_vec_t* ge_glyph_get_str_coords(const char* str, ge_coord_t start_coord)
 {
+  ge_coord_vec_t* const coord_vec = ge_coord_vec_create();
+  if (coord_vec == NULL) {
+    return NULL;
+  }
   const char* ch = str;
   ptrdiff_t x = start_coord.x;
   const ptrdiff_t y = start_coord.y;
-  size_t num_coords = 0;
   // Increment x by 9 because glyphs are 8 pixels wide
-  for (; *ch != '\0' && num_coords < max_num_coords; ch++, x += 9) {
+  for (; *ch != '\0'; ++ch, x += 9) {
     if (*ch == ' ') {
       continue;
     }
@@ -625,12 +627,17 @@ size_t ge_glyph_get_str_coords(const char* str, ge_coord_t start_coord, ge_coord
     size_t glyph_size = 0;
     if (!ge_glyph_get(*ch, &glyph_coords, &glyph_size)) {
       GE_LOG_ERROR("Unknow glyph: %c", *ch);
-      break;
+      ge_coord_vec_free(coord_vec);
+      return NULL;
     }
     const ge_coord_t glyph_offset = (ge_coord_t){x, y};
-    for (size_t ii = 0; ii < glyph_size && num_coords < max_num_coords; ++ii) {
-      output_coords[num_coords++] = ge_coord_add(glyph_offset, glyph_coords[ii]);
+    for (size_t ii = 0; ii < glyph_size; ++ii) {
+      if (!ge_coord_vec_push_back(coord_vec, ge_coord_add(glyph_offset, glyph_coords[ii]))) {
+        GE_LOG_ERROR("Could not grow vector for glyph: %c", *ch);
+        ge_coord_vec_free(coord_vec);
+        return NULL;
+      }
     }
   }
-  return num_coords;
+  return coord_vec;
 }
