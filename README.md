@@ -1,7 +1,7 @@
 # Grid Engine #
 
 <p align="center">
-    <img src="screenshots/grid_02.png" alt="Grid Image Banner" />
+    <img src="screenshots/grid_03.png" alt="Grid Image Banner" />
 </p>
 
 * Build simple cellular automatons!
