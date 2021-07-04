@@ -1,6 +1,8 @@
 # Grid Engine #
 
-![Grid Image Banner](screenshots/Grid_2.png)
+<p align="center">
+    <img src="screenshots/Grid_2.png" alt="Grid Image Banner" />
+</p>
 
 * Build simple cellular automatons!
 * Not quite a game engine, but sort of similar.
@@ -456,7 +458,9 @@ cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -I include -static-libgcc build/d
 <br>
 <br>
 
-![Grid Image](screenshots/Grid_1.png)
+<p align="center">
+    <img src="screenshots/Grid_1.png" alt="Grid Image" />
+</p>
 
 
 <!-- REFERENCE -->
