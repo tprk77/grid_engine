@@ -183,7 +183,7 @@ ifneq ($(MAKECMDGOALS), clean)
   -include $(GE_DMZE_DEPS)
 endif
 
-.PHONY: tests
+.PHONY: demos
 demos: $(GE_DEMO_CONWAY) $(GE_DEMO_LANGTON) $(GE_DEMO_PONG) $(GE_DEMO_PALETTE) $(GE_DEMO_MAZE)
 
 #########
