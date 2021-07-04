@@ -1,7 +1,7 @@
 # Grid Engine #
 
 <p align="center">
-    <img src="screenshots/Grid_2.png" alt="Grid Image Banner" />
+    <img src="screenshots/grid_02.png" alt="Grid Image Banner" />
 </p>
 
 * Build simple cellular automatons!
@@ -459,7 +459,7 @@ cc -std=c11 -Wall -Wextra -Werror -fPIC -O0 -g -I include -static-libgcc build/d
 <br>
 
 <p align="center">
-    <img src="screenshots/Grid_1.png" alt="Grid Image" />
+    <img src="screenshots/grid_01.png" alt="Grid Image" />
 </p>
 
 
