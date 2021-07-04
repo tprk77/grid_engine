@@ -24,4 +24,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: make
-      - run: make tests
+      - run: make demos
