@@ -7,7 +7,7 @@
 #define GE_GLYPHS_H_
 
 #include "grid_engine/coord.h"
-#include "grid_engine/utils.h"
+#include "grid_engine/coord_vec.h"
 
 extern const ge_coord_t GE_GLYPH_A[28];
 extern const ge_coord_t GE_GLYPH_B[33];
