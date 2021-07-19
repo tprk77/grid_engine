@@ -11,6 +11,8 @@
 
 static bool coord_inside(ge_coord_t coord, size_t width, size_t height);
 
+const ge_neighbors_t GE_NEIGHBORS_DEFAULTS = GE_NEIGHBORS_DEFAULTS_K;
+
 static const ge_direction_t GE_DIRECTION_OPPOSITES[GE_NUM_DIRECTIONS] = {
     GE_DIRECTION_SOUTH, GE_DIRECTION_SOUTHWEST, GE_DIRECTION_WEST, GE_DIRECTION_NORTHWEST,
     GE_DIRECTION_NORTH, GE_DIRECTION_NORTHEAST, GE_DIRECTION_EAST, GE_DIRECTION_SOUTHEAST,
@@ -18,20 +20,6 @@ static const ge_direction_t GE_DIRECTION_OPPOSITES[GE_NUM_DIRECTIONS] = {
 
 static const ge_coord_t GE_DIRECTION_OFFSETS[GE_NUM_DIRECTIONS] = {
     {0, -1}, {1, -1}, {1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1},
-};
-
-static const ge_neighbors_t GE_NEIGHBORS_DEFAULTS = {
-    .neighbors =
-        {
-            GE_INVALID_COORD_K,
-            GE_INVALID_COORD_K,
-            GE_INVALID_COORD_K,
-            GE_INVALID_COORD_K,
-            GE_INVALID_COORD_K,
-            GE_INVALID_COORD_K,
-            GE_INVALID_COORD_K,
-            GE_INVALID_COORD_K,
-        },
 };
 
 ge_direction_t ge_direction_get_opposite(ge_direction_t direction)
