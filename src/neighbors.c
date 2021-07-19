@@ -109,7 +109,7 @@ const ge_coord_t* ge_neighbors_next_coord(const ge_neighbors_t* neighbors,
   const ge_coord_t* const end_coord = neighbors->neighbors + GE_NUM_DIRECTIONS;
   const ge_coord_t* coord = (prev_coord == NULL ? begin_coord : prev_coord + 1);
   while (coord < end_coord && ge_coord_is_invalid(*coord)) {
-    ++prev_coord;
+    ++coord;
   }
   return (coord != end_coord ? coord : NULL);
 }
