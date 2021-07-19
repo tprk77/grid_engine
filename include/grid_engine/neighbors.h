@@ -30,6 +30,22 @@ typedef struct ge_neighbors {
   ge_coord_t neighbors[GE_NUM_DIRECTIONS];
 } ge_neighbors_t;
 
+#define GE_NEIGHBORS_DEFAULTS_K \
+  {                             \
+    .neighbors = {              \
+      GE_INVALID_COORD_K,       \
+      GE_INVALID_COORD_K,       \
+      GE_INVALID_COORD_K,       \
+      GE_INVALID_COORD_K,       \
+      GE_INVALID_COORD_K,       \
+      GE_INVALID_COORD_K,       \
+      GE_INVALID_COORD_K,       \
+      GE_INVALID_COORD_K,       \
+    }                           \
+  }
+
+extern const ge_neighbors_t GE_NEIGHBORS_DEFAULTS;
+
 ge_direction_t ge_direction_get_opposite(ge_direction_t direction);
 ge_coord_t ge_direction_get_offset(ge_direction_t direction);
 
