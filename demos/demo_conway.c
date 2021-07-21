@@ -50,16 +50,17 @@ void conway_loop_func(ge_grid_t* grid, void* user_data_, uint32_t time_ms)
     for (size_t ii = 0; ii < width; ++ii) {
       const ge_coord_t coord = (ge_coord_t){ii, jj};
       const bool is_live = (ge_grid_get_coord(grid, coord) != 0);
-      const ge_neighbors_t neighbors = ge_grid_get_neighbors_wrapped(grid, coord);
-      size_t num_live_neighbors = 0;
-      const ge_coord_t* neighbor_coord = NULL;
-      while ((neighbor_coord = ge_neighbors_next_coord(&neighbors, neighbor_coord)) != NULL) {
-        if (ge_grid_get_coord(grid, *neighbor_coord)) {
-          ++num_live_neighbors;
+      const ge_neighbors_t nbrs = ge_grid_get_neighbors_wrapped(grid, coord);
+      size_t num_live_nbrs = 0;
+      ge_direction_t nbr_dir = GE_DIRECTION_NONE;
+      while ((nbr_dir = ge_neighbors_next_direction(&nbrs, nbr_dir)) != GE_DIRECTION_NONE) {
+        const ge_coord_t nbr_coord = ge_neighbors_get_neighbor(&nbrs, nbr_dir);
+        if (ge_grid_get_coord(grid, nbr_coord) != 0) {
+          ++num_live_nbrs;
         }
       }
       // Apply the Game Of Life rules
-      if (gol_cell_live(is_live, num_live_neighbors)) {
+      if (gol_cell_live(is_live, num_live_nbrs)) {
         ge_grid_set_coord(user_data->temp_grid, coord, 255);
       }
       else {
