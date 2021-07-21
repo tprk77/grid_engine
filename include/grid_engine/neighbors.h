@@ -56,25 +56,27 @@ bool ge_neighbors_has_neighbor(const ge_neighbors_t* neighbors, ge_direction_t d
 ge_coord_t ge_neighbors_get_neighbor(const ge_neighbors_t* neighbors, ge_direction_t direction);
 
 /**
- * Used to iterate through a set of neighboring coords. If `prev_coord` is
- * `NULL`, this function will return the first coord in the set. If `prev_coord`
- * is the last coord in the set, the result will be `NULL`. Intended to be used
- * with a while loop, similarly to this:
+ * Used to iterate through a set of neighboring coords. If `prev_direction` is
+ * `GE_DIRECTION_NONE`, this function will return a direction corresponding to
+ * the first valid coord in the set. If `prev_direction` corresponds to the last
+ * valid coord in the set, the result will be `GE_DIRECTION_NONE`. Intended to
+ * be used with a while loop, similarly to this:
  *
  * ```
- * const ge_coord_t* nbr_coord = NULL;
- * while ((nbr_coord = ge_neighbors_next_coord(&nbrs, nbr_coord)) != NULL) {
+ * ge_direction_t nbr_dir = GE_DIRECTION_NONE;
+ * while ((dir = ge_neighbors_next_direction(&nbrs, nbr_dir)) != GE_DIRECTION_NONE) {
+ *   const ge_coord_t nbr_coord = ge_neighbors_get_neighbor(&nbrs, nbr_dir);
  *   ...
  * }
  * ```
  *
  * @param neighbors The set of neighboring coords.
  *
- * @param prev_coord The previous coord, or `NULL` if there wasn't one.
+ * @param prev_direction The previous direction, or `GE_DIRECTION_NONE` if there wasn't one.
  *
- * @return The next coord in the set, or `NULL` if there isn't one.
+ * @return The next direction in the set, or `GE_DIRECTION_NONE` if there isn't one.
  */
-const ge_coord_t* ge_neighbors_next_coord(const ge_neighbors_t* neighbors,
-                                          const ge_coord_t* prev_coord);
+ge_direction_t ge_neighbors_next_direction(const ge_neighbors_t* neighbors,
+                                           ge_direction_t prev_direction);
 
 #endif  // GE_NEIGHBORS_H_

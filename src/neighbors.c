@@ -102,16 +102,14 @@ ge_coord_t ge_neighbors_get_neighbor(const ge_neighbors_t* neighbors, ge_directi
   return neighbors->neighbors[direction];
 }
 
-const ge_coord_t* ge_neighbors_next_coord(const ge_neighbors_t* neighbors,
-                                          const ge_coord_t* prev_coord)
+ge_direction_t ge_neighbors_next_direction(const ge_neighbors_t* neighbors,
+                                           ge_direction_t prev_direction)
 {
-  const ge_coord_t* const begin_coord = neighbors->neighbors;
-  const ge_coord_t* const end_coord = neighbors->neighbors + GE_NUM_DIRECTIONS;
-  const ge_coord_t* coord = (prev_coord == NULL ? begin_coord : prev_coord + 1);
-  while (coord < end_coord && ge_coord_is_invalid(*coord)) {
-    ++coord;
+  size_t ii = (prev_direction != GE_DIRECTION_NONE ? prev_direction + 1 : 0);
+  while (ii < GE_NUM_DIRECTIONS && ge_coord_is_invalid(neighbors->neighbors[ii])) {
+    ++ii;
   }
-  return (coord != end_coord ? coord : NULL);
+  return (ii != GE_NUM_DIRECTIONS ? (ge_direction_t) ii : GE_DIRECTION_NONE);
 }
 
 static bool coord_inside(ge_coord_t coord, size_t width, size_t height)
