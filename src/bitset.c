@@ -92,6 +92,38 @@ size_t ge_bitset_search(const ge_bitset_t* bitset, size_t start_index)
   return GE_BITSET_SEARCH_INIT;
 }
 
+bool ge_bitset_has_none(const ge_bitset_t* bitset)
+{
+  for (size_t value_index = 0; value_index < bitset->num_values; ++value_index) {
+    if (bitset->values[value_index] != 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool ge_bitset_has_any(const ge_bitset_t* bitset)
+{
+  return !ge_bitset_has_none(bitset);
+}
+
+bool ge_bitset_has_all(const ge_bitset_t* bitset)
+{
+  // Check all but the last value
+  const size_t last_value_index = (bitset->num_values > 1 ? bitset->num_values - 1 : 0);
+  for (size_t value_index = 0; value_index < last_value_index - 1; ++value_index) {
+    if (bitset->values[value_index] != 0xFFFFFFFFFFFFFFFF) {
+      return false;
+    }
+  }
+  // Check the last value with a mask
+  const size_t last_bit_index = bitset->size % 64;
+  if (bitset->values[last_value_index] != (0xFFFFFFFFFFFFFFFF >> (64 - last_bit_index))) {
+    return false;
+  }
+  return true;
+}
+
 static void abort_on_out_of_bounds(const ge_bitset_t* bitset, size_t index)
 {
   if (index >= bitset->size) {
