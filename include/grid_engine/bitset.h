@@ -11,7 +11,7 @@
 
 typedef struct ge_bitset ge_bitset_t;
 
-const size_t GE_BITSET_SEARCH_INIT;
+extern const size_t GE_BITSET_SEARCH_INIT;
 
 ge_bitset_t* ge_bitset_create(size_t size);
 void ge_bitset_free(ge_bitset_t* bitset);
