@@ -49,10 +49,10 @@ void ge_bitset_set(ge_bitset_t* bitset, size_t index, bool value)
   const size_t value_index = index / 64;
   const size_t bit_index = index % 64;
   if (value) {
-    bitset->values[value_index] |= (INT64_C(1) << bit_index);
+    bitset->values[value_index] |= (UINT64_C(1) << bit_index);
   }
   else {
-    bitset->values[value_index] &= ~(INT64_C(1) << bit_index);
+    bitset->values[value_index] &= ~(UINT64_C(1) << bit_index);
   }
 }
 
@@ -61,7 +61,7 @@ bool ge_bitset_get(const ge_bitset_t* bitset, size_t index)
   abort_on_out_of_bounds(bitset, index);
   const size_t value_index = index / 64;
   const size_t bit_index = index % 64;
-  return ((bitset->values[value_index] & (INT64_C(1) << bit_index)) != 0);
+  return ((bitset->values[value_index] & (UINT64_C(1) << bit_index)) != 0);
 }
 
 size_t ge_bitset_search(const ge_bitset_t* bitset, size_t start_index)
