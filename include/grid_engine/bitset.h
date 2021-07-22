@@ -18,5 +18,8 @@ void ge_bitset_free(ge_bitset_t* bitset);
 void ge_bitset_set(ge_bitset_t* bitset, size_t index, bool value);
 bool ge_bitset_get(const ge_bitset_t* bitset, size_t index);
 size_t ge_bitset_search(const ge_bitset_t* bitset, size_t start_index);
+bool ge_bitset_has_none(const ge_bitset_t* bitset);
+bool ge_bitset_has_any(const ge_bitset_t* bitset);
+bool ge_bitset_has_all(const ge_bitset_t* bitset);
 
 #endif  // GE_BITSET_H_
