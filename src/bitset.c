@@ -15,6 +15,8 @@ typedef struct ge_bitset {
   uint64_t* values;
 } ge_bitset_t;
 
+const size_t GE_BITSET_SEARCH_INIT = SIZE_MAX;
+
 static void abort_on_out_of_bounds(const ge_bitset_t* bitset, size_t index);
 static size_t get_first_bit_index(uint64_t value);
 
