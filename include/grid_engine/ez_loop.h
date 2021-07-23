@@ -24,7 +24,7 @@ typedef void (*ge_ez_event_func_t)(ge_grid_t* grid, void* user_data, uint32_t ti
  */
 typedef struct ez_loop_data {
   ge_grid_t* grid;
-  ge_palette_t* palette;
+  const ge_palette_t* palette;
   void* user_data;
   ge_ez_loop_func_t loop_func;
   ge_ez_event_func_t event_func;

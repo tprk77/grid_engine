@@ -15,7 +15,7 @@ static const uint32_t TARGET_LOOP_MS = 17;
 int ge_ez_loop(const ez_loop_data_t* const ez_loop_data)
 {
   ge_grid_t* const grid = ez_loop_data->grid;
-  ge_palette_t* const palette = ez_loop_data->palette;
+  const ge_palette_t* const palette = ez_loop_data->palette;
   void* const user_data = ez_loop_data->user_data;
   const ge_ez_loop_func_t loop_func = ez_loop_data->loop_func;
   const ge_ez_event_func_t event_func = ez_loop_data->event_func;
