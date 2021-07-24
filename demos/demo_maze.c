@@ -310,5 +310,7 @@ int main(void)
       .event_func = NULL,
   };
   // RUN THE LOOP!
-  return ge_ez_loop(&ez_loop_data);
+  const int result = ge_ez_loop(&ez_loop_data);
+  maze_grid_free(mgrid);
+  return result;
 }
