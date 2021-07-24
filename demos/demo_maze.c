@@ -132,7 +132,7 @@ uint8_t maze_value_set_path(uint8_t value, maze_pathval_t pathval)
 
 bool maze_value_is_path(uint8_t value, maze_pathval_t pathval)
 {
-  return (value & MAZE_PATHVAL_BIT_MASK) == pathval;
+  return (value & MAZE_PATHVAL_BIT_MASK) == MAZE_PATHVAL_TO_BITS[pathval];
 }
 
 maze_grid_t* maze_grid_create(size_t width, size_t height)
