@@ -229,6 +229,34 @@ void maze_grid_set_coord(maze_grid_t* mgrid, ge_coord_t coord, uint8_t value)
   }
 }
 
+void maze_grid_set_coord_set_connection(maze_grid_t* mgrid, ge_coord_t coord, maze_conval_t conval)
+{
+  const uint8_t prv_value = ge_grid_get_coord(mgrid->logic_grid, coord);
+  const uint8_t nxt_value = maze_value_set_connection(prv_value, conval);
+  maze_grid_set_coord(mgrid, coord, nxt_value);
+}
+
+void maze_grid_set_coord_add_connection(maze_grid_t* mgrid, ge_coord_t coord, maze_conval_t conval)
+{
+  const uint8_t prv_value = ge_grid_get_coord(mgrid->logic_grid, coord);
+  const uint8_t nxt_value = maze_value_add_connection(prv_value, conval);
+  maze_grid_set_coord(mgrid, coord, nxt_value);
+}
+
+void maze_grid_set_coord_rm_connection(maze_grid_t* mgrid, ge_coord_t coord, maze_conval_t conval)
+{
+  const uint8_t prv_value = ge_grid_get_coord(mgrid->logic_grid, coord);
+  const uint8_t nxt_value = maze_value_remove_connection(prv_value, conval);
+  maze_grid_set_coord(mgrid, coord, nxt_value);
+}
+
+void maze_grid_set_coord_set_path(maze_grid_t* mgrid, ge_coord_t coord, maze_pathval_t pathval)
+{
+  const uint8_t prv_value = ge_grid_get_coord(mgrid->logic_grid, coord);
+  const uint8_t nxt_value = maze_value_set_path(prv_value, pathval);
+  maze_grid_set_coord(mgrid, coord, nxt_value);
+}
+
 uint8_t maze_grid_get_coord_wrapped(const maze_grid_t* mgrid, ge_coord_t coord)
 {
   return ge_grid_get_coord_wrapped(mgrid->logic_grid, coord);
