@@ -10,6 +10,7 @@
 typedef struct maze_grid {
   ge_grid_t* logic_grid;
   ge_grid_t* render_grid;
+  ge_bitset_t* edge_bitset;
 } maze_grid_t;
 
 #define NUM_MAZE_CONVALS 4
@@ -154,6 +155,13 @@ maze_grid_t* maze_grid_create(size_t width, size_t height)
     free(mgrid);
     return NULL;
   }
+  mgrid->edge_bitset = ge_bitset_create(width * height);
+  if (mgrid->edge_bitset == NULL) {
+    ge_grid_free(mgrid->logic_grid);
+    ge_grid_free(mgrid->render_grid);
+    free(mgrid);
+    return NULL;
+  }
   // Render the cells of the maze (assuming all unconnected)
   for (size_t jj = 1; jj < render_height; jj += 2) {
     for (size_t ii = 1; ii < render_width; ii += 2) {
@@ -170,6 +178,7 @@ void maze_grid_free(maze_grid_t* mgrid)
   }
   ge_grid_free(mgrid->logic_grid);
   ge_grid_free(mgrid->render_grid);
+  ge_bitset_free(mgrid->edge_bitset);
   free(mgrid);
 }
 
@@ -217,6 +226,14 @@ void maze_grid_set_coord(maze_grid_t* mgrid, ge_coord_t coord, uint8_t value)
     const uint8_t nxt_value = (added_conval ? maze_value_add_connection(nbr_value, ops_conval)
                                             : maze_value_remove_connection(nbr_value, ops_conval));
     ge_grid_set_coord(mgrid->logic_grid, nbr_coord, nxt_value);
+  }
+  // Update the edge bitset
+  const bool prv_edge = maze_value_is_path(prv_value, MAZE_PATHVAL_EDGE);
+  const bool cur_edge = maze_value_is_path(value, MAZE_PATHVAL_EDGE);
+  if (prv_edge != cur_edge) {
+    const size_t width = maze_grid_get_width(mgrid);
+    const size_t bitset_index = width * coord.y + coord.x;
+    ge_bitset_set(mgrid->edge_bitset, bitset_index, cur_edge);
   }
   // Update the rendered grid
   const ge_coord_t render_coord = {2 * coord.x + 1, 2 * coord.y + 1};
@@ -287,6 +304,17 @@ ge_neighbors_t maze_grid_get_connected_neighbors(const maze_grid_t* mgrid, ge_co
     }
   }
   return connected_nbrs;
+}
+
+ge_coord_vec_t* maze_grid_get_edge_coords(const maze_grid_t* mgrid)
+{
+  const size_t width = maze_grid_get_width(mgrid);
+  ge_coord_vec_t* edge_coords = ge_coord_vec_create();
+  size_t edge_index = GE_BITSET_SEARCH_INIT;
+  while ((edge_index = ge_bitset_search(mgrid->edge_bitset, edge_index)) != GE_BITSET_SEARCH_INIT) {
+    ge_coord_vec_push_back(edge_coords, (ge_coord_t){edge_index % width, edge_index / width});
+  }
+  return edge_coords;
 }
 
 void maze_grid_recursive_backtracker(maze_grid_t* mgrid)
