@@ -269,6 +269,26 @@ void maze_grid_set_coord_wrapped(maze_grid_t* mgrid, ge_coord_t coord, uint8_t v
   maze_grid_set_coord(mgrid, coord, value);
 }
 
+ge_neighbors_t maze_grid_get_connected_neighbors(const maze_grid_t* mgrid, ge_coord_t coord)
+{
+  const uint8_t value = maze_grid_get_coord(mgrid, coord);
+  const ge_neighbors_t nbrs = ge_grid_get_neighbors(mgrid->logic_grid, coord);
+  ge_neighbors_t connected_nbrs = GE_NEIGHBORS_DEFAULTS;
+  for (size_t ii = 0; ii < NUM_MAZE_CONVALS; ++ii) {
+    const maze_conval_t conval = MAZE_CONVALS[ii];
+    const ge_direction_t direction = MAZE_CONVAL_TO_DIRECTION[conval];
+    // Ignore invalid neighbors, even if connected
+    if (!ge_neighbors_has_neighbor(&nbrs, direction)) {
+      continue;
+    }
+    // Copy connected neighbors to the result
+    if (maze_value_has_connection(value, conval)) {
+      connected_nbrs.neighbors[direction] = nbrs.neighbors[direction];
+    }
+  }
+  return connected_nbrs;
+}
+
 void maze_grid_recursive_backtracker(maze_grid_t* mgrid)
 {
   const size_t width = maze_grid_get_width(mgrid);
