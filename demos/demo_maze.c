@@ -381,6 +381,66 @@ void maze_grid_recursive_backtracker(maze_grid_t* mgrid)
   free(conval_stack);
 }
 
+void maze_grid_distances(maze_grid_t* mgrid, ge_coord_t start_coord, size_t* dist_grid)
+{
+  // It's assumed that dist_grid is already allocated to the right size
+  const size_t width = maze_grid_get_width(mgrid);
+  const size_t height = maze_grid_get_height(mgrid);
+  // Fill distance grid with max values (approximating infinity)
+  for (size_t jj = 0; jj < height; ++jj) {
+    for (size_t ii = 0; ii < width; ++ii) {
+      dist_grid[width * jj + ii] = SIZE_MAX;
+    }
+  }
+  // Set the starting coord as an edge with distance zero
+  maze_grid_set_coord_set_path(mgrid, start_coord, MAZE_PATHVAL_EDGE);
+  dist_grid[width * start_coord.y + start_coord.x] = 0;
+  // We are done when the edge set is empty
+  while (true) {
+    // Find the lowest distance (and check for an empty edge set)
+    size_t min_dist = SIZE_MAX;
+    size_t min_dist_index = SIZE_MAX;
+    ge_coord_t edge_coord = GE_INVALID_COORD;
+    while (!ge_coord_is_invalid(edge_coord = maze_grid_next_edge_coord(mgrid, edge_coord))) {
+      const size_t coord_index = width * edge_coord.y + edge_coord.x;
+      const size_t coord_dist = dist_grid[coord_index];
+      if (coord_dist < min_dist) {
+        min_dist = coord_dist;
+        min_dist_index = coord_index;
+      }
+    }
+    // Bail if on an empty edge set
+    if (min_dist_index == SIZE_MAX) {
+      break;
+    }
+    // Expand the cell with the minimum distance
+    const ge_coord_t cur_coord = (ge_coord_t){min_dist_index % width, min_dist_index / width};
+    const size_t cur_dist = min_dist;
+    maze_grid_set_coord_set_path(mgrid, cur_coord, MAZE_PATHVAL_VISITED);
+    // Check for unvisited neighbors
+    const ge_neighbors_t nbrs = maze_grid_get_connected_neighbors(mgrid, cur_coord);
+    ge_direction_t nbr_dir = GE_DIRECTION_NONE;
+    while ((nbr_dir = ge_neighbors_next_direction(&nbrs, nbr_dir)) != GE_DIRECTION_NONE) {
+      const ge_coord_t nbr_coord = ge_neighbors_get_neighbor(&nbrs, nbr_dir);
+      // Only process unvisited and edge neighbors
+      const uint8_t nbr_value = maze_grid_get_coord(mgrid, nbr_coord);
+      if (!maze_value_is_path(nbr_value, MAZE_PATHVAL_UNVISITED)
+          && !maze_value_is_path(nbr_value, MAZE_PATHVAL_EDGE)) {
+        continue;
+      }
+      // Update distance for the neighbor cell
+      size_t* const nbr_dist = dist_grid + width * nbr_coord.y + nbr_coord.x;
+      if (*nbr_dist > cur_dist + 1) {
+        *nbr_dist = cur_dist + 1;
+      }
+      // Set unvisited nodes to now be edges
+      if (maze_value_is_path(nbr_value, MAZE_PATHVAL_UNVISITED)) {
+        maze_grid_set_coord(mgrid, nbr_coord, maze_value_set_path(nbr_value, MAZE_PATHVAL_EDGE));
+      }
+    }
+  }
+}
+
 int main(void)
 {
   const size_t width = 100;
