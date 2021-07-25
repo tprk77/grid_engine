@@ -82,6 +82,9 @@ static const uint8_t MAZE_PATHVAL_TO_BITS[NUM_MAZE_PATHVALS] = {
     MAZE_PATHVAL_VISITED_BITS,
 };
 
+static const uint8_t MAZE_RENDER_VALUE_LOW = 50;
+static const uint8_t MAZE_RENDER_VALUE_HIGH = 150;
+
 uint8_t maze_value_set_connection(uint8_t value, maze_conval_t conval)
 {
   if (conval == MAZE_CONVAL_NONE) {
@@ -441,6 +444,40 @@ void maze_grid_distances(maze_grid_t* mgrid, ge_coord_t start_coord, size_t* dis
   }
 }
 
+void maze_grid_render_distances(const maze_grid_t* mgrid, size_t* dist_grid)
+{
+  // It's assumed that dist_grid is already allocated to the right size
+  const size_t width = maze_grid_get_width(mgrid);
+  const size_t height = maze_grid_get_height(mgrid);
+  // Find the maximum distance to scale everything to
+  size_t max_dist = 0;
+  for (size_t jj = 0; jj < height; ++jj) {
+    for (size_t ii = 0; ii < width; ++ii) {
+      const size_t dist = dist_grid[width * jj + ii];
+      max_dist = (dist > max_dist ? dist : max_dist);
+    }
+  }
+  // Color the distances according to the palette
+  for (size_t jj = 0; jj < height; ++jj) {
+    for (size_t ii = 0; ii < width; ++ii) {
+      const ge_coord_t coord = {ii, jj};
+      const size_t dist_value =
+          (MAZE_RENDER_VALUE_HIGH * dist_grid[width * jj + ii]) / max_dist + MAZE_RENDER_VALUE_LOW;
+      const ge_coord_t render_coord = {2 * coord.x + 1, 2 * coord.y + 1};
+      ge_grid_set_coord(mgrid->render_grid, render_coord, dist_value);
+      const uint8_t value = maze_grid_get_coord(mgrid, coord);
+      if (maze_value_has_connection(value, MAZE_CONVAL_EAST)) {
+        const ge_coord_t render_coord_east = {2 * coord.x + 2, 2 * coord.y + 1};
+        ge_grid_set_coord(mgrid->render_grid, render_coord_east, dist_value);
+      }
+      if (maze_value_has_connection(value, MAZE_CONVAL_SOUTH)) {
+        const ge_coord_t render_coord_south = {2 * coord.x + 1, 2 * coord.y + 2};
+        ge_grid_set_coord(mgrid->render_grid, render_coord_south, dist_value);
+      }
+    }
+  }
+}
+
 int main(void)
 {
   const size_t width = 100;
@@ -448,16 +485,23 @@ int main(void)
   maze_grid_t* const mgrid = maze_grid_create(width, height);
   // Do maze generation
   maze_grid_recursive_backtracker(mgrid);
+  // Find distances and render them
+  size_t* const dist_grid = calloc(width * height, sizeof(size_t));
+  GE_LOG_INFO("Finding distances...");
+  maze_grid_distances(mgrid, (ge_coord_t){0, 0}, dist_grid);
+  GE_LOG_INFO("Rendering distances...");
+  maze_grid_render_distances(mgrid, dist_grid);
   // The EZ loop data
   ez_loop_data_t ez_loop_data = {
       .grid = mgrid->render_grid,
-      .palette = NULL,
+      .palette = &GE_PALETTE_INFERNO,
       .user_data = NULL,
       .loop_func = NULL,
       .event_func = NULL,
   };
   // RUN THE LOOP!
   const int result = ge_ez_loop(&ez_loop_data);
+  free(dist_grid);
   maze_grid_free(mgrid);
   return result;
 }
