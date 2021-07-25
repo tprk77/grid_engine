@@ -317,6 +317,17 @@ ge_coord_vec_t* maze_grid_get_edge_coords(const maze_grid_t* mgrid)
   return edge_coords;
 }
 
+ge_coord_t maze_grid_next_edge_coord(const maze_grid_t* mgrid, ge_coord_t start_coord)
+{
+  const size_t width = maze_grid_get_width(mgrid);
+  const size_t start_edge_index =
+      (!ge_coord_is_invalid(start_coord) ? width * start_coord.y + start_coord.x
+                                         : GE_BITSET_SEARCH_INIT);
+  const size_t edge_index = ge_bitset_search(mgrid->edge_bitset, start_edge_index);
+  return (edge_index != GE_BITSET_SEARCH_INIT ? (ge_coord_t){edge_index % width, edge_index / width}
+                                              : GE_INVALID_COORD);
+}
+
 void maze_grid_recursive_backtracker(maze_grid_t* mgrid)
 {
   const size_t width = maze_grid_get_width(mgrid);
