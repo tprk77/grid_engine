@@ -8,6 +8,10 @@
 
 #include "grid_engine/engine.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * The "EZ" update function type. See `ge_ez_loop` for usage.
  */
@@ -51,5 +55,9 @@ typedef struct ez_loop_data {
  * like the loop function), as well as the pointer to the event.
  */
 int ge_ez_loop(const ez_loop_data_t* ez_loop_data);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // GE_EZ_LOOP_H_

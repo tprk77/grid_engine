@@ -9,6 +9,10 @@
 #include "grid_engine/coord.h"
 #include "grid_engine/coord_vec.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern const ge_coord_t GE_GLYPH_A[28];
 extern const ge_coord_t GE_GLYPH_B[33];
 extern const ge_coord_t GE_GLYPH_C[22];
@@ -84,5 +88,9 @@ bool ge_glyph_get(char glyph, const ge_coord_t** glyph_coords, size_t* glyph_siz
  * Get a newly allocated vector of coords corresponding to a string of glyphs.
  */
 ge_coord_vec_t* ge_glyph_get_str_coords(const char* str, ge_coord_t start_coord);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // GE_GLYPHS_H_

@@ -6,6 +6,10 @@
 #ifndef GE_ERROR_H_
 #define GE_ERROR_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum ge_error {
   GE_OK = 0,
   GE_ERROR_ALREADY_INITED,
@@ -17,5 +21,9 @@ typedef enum ge_error {
   GE_ERROR_NO_WINDOW,
   GE_ERROR_DRAWING,
 } ge_error_t;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // GE_ERROR_H_

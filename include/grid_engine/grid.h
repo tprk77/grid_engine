@@ -12,6 +12,10 @@
 #include "grid_engine/coord.h"
 #include "grid_engine/neighbors.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct ge_grid ge_grid_t;
 
 ge_grid_t* ge_grid_create(size_t width, size_t height);
@@ -29,5 +33,9 @@ uint8_t ge_grid_get_coord_wrapped(const ge_grid_t* grid, ge_coord_t coord);
 void ge_grid_set_coord_wrapped(ge_grid_t* grid, ge_coord_t coord, uint8_t value);
 ge_neighbors_t ge_grid_get_neighbors(const ge_grid_t* grid, ge_coord_t coord);
 ge_neighbors_t ge_grid_get_neighbors_wrapped(const ge_grid_t* grid, ge_coord_t coord);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // GE_GRID_H_

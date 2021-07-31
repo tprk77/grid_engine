@@ -11,6 +11,10 @@
 
 #include "grid_engine/coord.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define GE_NUM_DIRECTIONS 8
 
 typedef enum ge_direction {
@@ -78,5 +82,9 @@ ge_coord_t ge_neighbors_get_neighbor(const ge_neighbors_t* neighbors, ge_directi
  */
 ge_direction_t ge_neighbors_next_direction(const ge_neighbors_t* neighbors,
                                            ge_direction_t prev_direction);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // GE_NEIGHBORS_H_

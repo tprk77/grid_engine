@@ -10,6 +10,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Represents a coordinate or an offset on the grid.
  *
@@ -36,5 +40,9 @@ ge_coord_t ge_coord_clamp(ge_coord_t coord, size_t width, size_t height);
 ge_coord_t ge_coord_wrap(ge_coord_t coord, size_t width, size_t height);
 bool ge_coord_equals(ge_coord_t coord, ge_coord_t other_coord);
 bool ge_coord_is_invalid(ge_coord_t coord);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // GE_COORD_H_

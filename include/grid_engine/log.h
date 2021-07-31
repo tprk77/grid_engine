@@ -10,6 +10,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum ge_log_level {
   GE_LOG_LEVEL_ERROR,
   GE_LOG_LEVEL_WARN,
@@ -23,5 +27,9 @@ void ge_log(ge_log_level_t log_level, const char* format, ...);
 #define GE_LOG_WARN(...) ge_log(GE_LOG_LEVEL_WARN, __VA_ARGS__)
 #define GE_LOG_INFO(...) ge_log(GE_LOG_LEVEL_INFO, __VA_ARGS__)
 #define GE_LOG_DEBUG(...) ge_log(GE_LOG_LEVEL_DEBUG, __VA_ARGS__)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // GE_LOG_H_

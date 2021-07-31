@@ -9,6 +9,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum ge_event_type {
   GE_EVENT_NONE = 0,
   GE_EVENT_KEYDOWN,
@@ -138,5 +142,9 @@ typedef struct ge_event {
 bool ge_fill_event(ge_event_t* event, void* internal_event);
 
 const char* ge_keycode_to_str(ge_keycode_t keycode);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // GE_EVENT_H_

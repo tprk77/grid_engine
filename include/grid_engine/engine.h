@@ -15,6 +15,10 @@
 #include "grid_engine/grid.h"
 #include "grid_engine/palette.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // TODO Other graphics options like fullscreen
 typedef struct ge_gfx_opts {
   size_t pixel_multiplier;
@@ -41,5 +45,9 @@ bool ge_poll_events(ge_event_t* event);
 bool ge_should_quit(void);
 uint32_t ge_get_time_ms(void);
 void ge_sleep_ms(uint32_t duration_ms);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // GE_ENGINE_H_

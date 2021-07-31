@@ -10,6 +10,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Color represented as the addition of red, blue, and green values.
  */
@@ -32,5 +36,9 @@ typedef struct ge_palette {
  * See also: https://matplotlib.org/examples/color/colormaps_reference.html
  */
 extern const ge_palette_t GE_PALETTE_INFERNO;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // GE_PALETTE_H_

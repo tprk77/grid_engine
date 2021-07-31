@@ -10,6 +10,10 @@
 
 #include "grid_engine/coord.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct ge_coord_vec ge_coord_vec_t;
 
 ge_coord_vec_t* ge_coord_vec_create();
@@ -27,5 +31,9 @@ ge_coord_t* ge_coord_vec_begin(ge_coord_vec_t* coord_vec);
 ge_coord_t* ge_coord_vec_end(ge_coord_vec_t* coord_vec);
 const ge_coord_t* ge_coord_vec_cbegin(const ge_coord_vec_t* coord_vec);
 const ge_coord_t* ge_coord_vec_cend(const ge_coord_vec_t* coord_vec);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // GE_COORD_VEC_H_

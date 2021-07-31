@@ -9,6 +9,10 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct ge_bitset ge_bitset_t;
 
 extern const size_t GE_BITSET_SEARCH_INIT;
@@ -21,5 +25,9 @@ size_t ge_bitset_search(const ge_bitset_t* bitset, size_t start_index);
 bool ge_bitset_has_none(const ge_bitset_t* bitset);
 bool ge_bitset_has_any(const ge_bitset_t* bitset);
 bool ge_bitset_has_all(const ge_bitset_t* bitset);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // GE_BITSET_H_
