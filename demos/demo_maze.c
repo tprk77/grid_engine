@@ -3,9 +3,9 @@
 // Licensed under an MIT style license, see LICENSE.md for details.
 // You are free to copy and modify this code. Happy hacking!
 
-#include "grid_engine/grid_engine.h"
-
 #include <stdlib.h>
+
+#include "grid_engine/grid_engine.h"
 
 typedef struct maze_grid {
   ge_grid_t* logic_grid;

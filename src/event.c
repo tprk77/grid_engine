@@ -5,7 +5,7 @@
 
 #include "grid_engine/event.h"
 
-#include "SDL2/SDL.h"
+#include <SDL2/SDL.h>
 
 #include "grid_engine/log.h"
 
