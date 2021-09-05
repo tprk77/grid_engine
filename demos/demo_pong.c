@@ -3,11 +3,11 @@
 // Licensed under an MIT style license, see LICENSE.md for details.
 // You are free to copy and modify this code. Happy hacking!
 
-#include "grid_engine/grid_engine.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+
+#include "grid_engine/grid_engine.h"
 
 /*
  * It's assumed that the ball never moves more than one pixel per update. (This effectively caps the

@@ -4,6 +4,7 @@
 // You are free to copy and modify this code. Happy hacking!
 
 #include "grid_engine/glyphs.h"
+
 #include "grid_engine/log.h"
 
 const ge_coord_t GE_GLYPH_A[28] = {

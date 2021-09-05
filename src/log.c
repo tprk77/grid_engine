@@ -5,7 +5,7 @@
 
 #include "grid_engine/log.h"
 
-#include "SDL2/SDL.h"
+#include <SDL2/SDL.h>
 
 void ge_log(ge_log_level_t log_level, const char* format, ...)
 {
