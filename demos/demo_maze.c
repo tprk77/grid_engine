@@ -6,389 +6,68 @@
 #include <stdlib.h>
 
 #include "grid_engine/grid_engine.h"
-
-typedef struct maze_grid {
-  ge_grid_t* logic_grid;
-  ge_grid_t* render_grid;
-  ge_bitset_t* edge_bitset;
-} maze_grid_t;
-
-#define NUM_MAZE_CONVALS 4
-
-typedef enum maze_conval {
-  MAZE_CONVAL_NORTH = 0,
-  MAZE_CONVAL_EAST,
-  MAZE_CONVAL_SOUTH,
-  MAZE_CONVAL_WEST,
-  MAZE_CONVAL_NONE,  // Special value to indicate no connections
-  MAZE_CONVAL_ALL,   // Special value to indicate all connections
-} maze_conval_t;
-
-static const maze_conval_t MAZE_CONVALS[NUM_MAZE_CONVALS] = {
-    MAZE_CONVAL_NORTH,
-    MAZE_CONVAL_EAST,
-    MAZE_CONVAL_SOUTH,
-    MAZE_CONVAL_WEST,
-};
-
-#define MAZE_CONVAL_BIT_MASK UINT8_C(0x0F)
-#define MAZE_CONVAL_BIT_OFFSET 0
-#define MAZE_CONVAL_NORTH_BIT ((UINT8_C(1) << MAZE_CONVAL_NORTH) << MAZE_CONVAL_BIT_OFFSET)
-#define MAZE_CONVAL_EAST_BIT ((UINT8_C(1) << MAZE_CONVAL_EAST) << MAZE_CONVAL_BIT_OFFSET)
-#define MAZE_CONVAL_SOUTH_BIT ((UINT8_C(1) << MAZE_CONVAL_SOUTH) << MAZE_CONVAL_BIT_OFFSET)
-#define MAZE_CONVAL_WEST_BIT ((UINT8_C(1) << MAZE_CONVAL_WEST) << MAZE_CONVAL_BIT_OFFSET)
-
-static const uint8_t MAZE_CONVAL_TO_BITS[NUM_MAZE_CONVALS] = {
-    MAZE_CONVAL_NORTH_BIT,
-    MAZE_CONVAL_EAST_BIT,
-    MAZE_CONVAL_SOUTH_BIT,
-    MAZE_CONVAL_WEST_BIT,
-};
-
-static const maze_conval_t MAZE_CONVAL_TO_OPPOSITE[NUM_MAZE_CONVALS] = {
-    MAZE_CONVAL_SOUTH,
-    MAZE_CONVAL_WEST,
-    MAZE_CONVAL_NORTH,
-    MAZE_CONVAL_EAST,
-};
-
-static const ge_direction_t MAZE_CONVAL_TO_DIRECTION[NUM_MAZE_CONVALS] = {
-    GE_DIRECTION_NORTH,
-    GE_DIRECTION_EAST,
-    GE_DIRECTION_SOUTH,
-    GE_DIRECTION_WEST,
-};
-
-#define NUM_MAZE_PATHVALS 4
-
-typedef enum maze_pathval {
-  MAZE_PATHVAL_UNVISITED = 0,
-  MAZE_PATHVAL_PATHED,
-  MAZE_PATHVAL_EDGE,
-  MAZE_PATHVAL_VISITED,
-} maze_pathval_t;
-
-#define MAZE_PATHVAL_BIT_MASK UINT8_C(0x30)
-#define MAZE_PATHVAL_BIT_OFFSET 4
-#define MAZE_PATHVAL_UNVISITED_BITS (UINT8_C(MAZE_PATHVAL_UNVISITED) << MAZE_PATHVAL_BIT_OFFSET)
-#define MAZE_PATHVAL_PATHED_BITS (UINT8_C(MAZE_PATHVAL_PATHED) << MAZE_PATHVAL_BIT_OFFSET)
-#define MAZE_PATHVAL_EDGE_BITS (UINT8_C(MAZE_PATHVAL_EDGE) << MAZE_PATHVAL_BIT_OFFSET)
-#define MAZE_PATHVAL_VISITED_BITS (UINT8_C(MAZE_PATHVAL_VISITED) << MAZE_PATHVAL_BIT_OFFSET)
-
-static const uint8_t MAZE_PATHVAL_TO_BITS[NUM_MAZE_PATHVALS] = {
-    MAZE_PATHVAL_UNVISITED_BITS,
-    MAZE_PATHVAL_PATHED_BITS,
-    MAZE_PATHVAL_EDGE_BITS,
-    MAZE_PATHVAL_VISITED_BITS,
-};
+#include "grid_engine/mz_grid.h"
 
 static const uint8_t MAZE_RENDER_VALUE_LOW = 50;
 static const uint8_t MAZE_RENDER_VALUE_HIGH = 150;
 
-uint8_t maze_value_set_connection(uint8_t value, maze_conval_t conval)
+void recursive_backtracker(ge_mz_grid_t* grid)
 {
-  if (conval == MAZE_CONVAL_NONE) {
-    return value & ~MAZE_CONVAL_BIT_MASK;
-  }
-  if (conval == MAZE_CONVAL_ALL) {
-    return value | MAZE_CONVAL_BIT_MASK;
-  }
-  return (value & ~MAZE_CONVAL_BIT_MASK) | MAZE_CONVAL_TO_BITS[conval];
-}
-
-uint8_t maze_value_add_connection(uint8_t value, maze_conval_t conval)
-{
-  if (conval == MAZE_CONVAL_NONE) {
-    return value;
-  }
-  if (conval == MAZE_CONVAL_ALL) {
-    return value | MAZE_CONVAL_BIT_MASK;
-  }
-  return value | MAZE_CONVAL_TO_BITS[conval];
-}
-
-uint8_t maze_value_remove_connection(uint8_t value, maze_conval_t conval)
-{
-  if (conval == MAZE_CONVAL_NONE) {
-    return value;
-  }
-  if (conval == MAZE_CONVAL_ALL) {
-    return value & ~MAZE_CONVAL_BIT_MASK;
-  }
-  return value & ~MAZE_CONVAL_TO_BITS[conval];
-}
-
-bool maze_value_has_connection(uint8_t value, maze_conval_t conval)
-{
-  if (conval == MAZE_CONVAL_NONE) {
-    return (value & MAZE_CONVAL_BIT_MASK) == 0;
-  }
-  if (conval == MAZE_CONVAL_ALL) {
-    return (value & MAZE_CONVAL_BIT_MASK) == MAZE_CONVAL_BIT_MASK;
-  }
-  return value & MAZE_CONVAL_TO_BITS[conval];
-}
-
-uint8_t maze_value_set_path(uint8_t value, maze_pathval_t pathval)
-{
-  return (value & ~MAZE_PATHVAL_BIT_MASK) | MAZE_PATHVAL_TO_BITS[pathval];
-}
-
-bool maze_value_is_path(uint8_t value, maze_pathval_t pathval)
-{
-  return (value & MAZE_PATHVAL_BIT_MASK) == MAZE_PATHVAL_TO_BITS[pathval];
-}
-
-maze_grid_t* maze_grid_create(size_t width, size_t height)
-{
-  maze_grid_t* mgrid = calloc(1, sizeof(maze_grid_t));
-  if (mgrid == NULL) {
-    return NULL;
-  }
-  mgrid->logic_grid = ge_grid_create(width, height);
-  if (mgrid->logic_grid == NULL) {
-    free(mgrid);
-    return NULL;
-  }
-  const size_t render_width = width * 2 + 1;
-  const size_t render_height = height * 2 + 1;
-  mgrid->render_grid = ge_grid_create(render_width, render_height);
-  if (mgrid->render_grid == NULL) {
-    ge_grid_free(mgrid->logic_grid);
-    free(mgrid);
-    return NULL;
-  }
-  mgrid->edge_bitset = ge_bitset_create(width * height);
-  if (mgrid->edge_bitset == NULL) {
-    ge_grid_free(mgrid->logic_grid);
-    ge_grid_free(mgrid->render_grid);
-    free(mgrid);
-    return NULL;
-  }
-  // Render the cells of the maze (assuming all unconnected)
-  for (size_t jj = 1; jj < render_height; jj += 2) {
-    for (size_t ii = 1; ii < render_width; ii += 2) {
-      ge_grid_set_coord(mgrid->render_grid, (ge_coord_t){ii, jj}, 255);
-    }
-  }
-  return mgrid;
-}
-
-void maze_grid_free(maze_grid_t* mgrid)
-{
-  if (mgrid == NULL) {
-    return;
-  }
-  ge_grid_free(mgrid->logic_grid);
-  ge_grid_free(mgrid->render_grid);
-  ge_bitset_free(mgrid->edge_bitset);
-  free(mgrid);
-}
-
-size_t maze_grid_get_width(const maze_grid_t* mgrid)
-{
-  return ge_grid_get_width(mgrid->logic_grid);
-}
-
-size_t maze_grid_get_height(const maze_grid_t* mgrid)
-{
-  return ge_grid_get_height(mgrid->logic_grid);
-}
-
-bool maze_grid_has_coord(const maze_grid_t* mgrid, ge_coord_t coord)
-{
-  return ge_grid_has_coord(mgrid->logic_grid, coord);
-}
-
-uint8_t maze_grid_get_coord(const maze_grid_t* mgrid, ge_coord_t coord)
-{
-  return ge_grid_get_coord(mgrid->logic_grid, coord);
-}
-
-void maze_grid_set_coord(maze_grid_t* mgrid, ge_coord_t coord, uint8_t value)
-{
-  // Update the logical grid
-  const uint8_t prv_value = ge_grid_get_coord(mgrid->logic_grid, coord);
-  ge_grid_set_coord(mgrid->logic_grid, coord, value);
-  for (size_t ii = 0; ii < NUM_MAZE_CONVALS; ++ii) {
-    const maze_conval_t conval = MAZE_CONVALS[ii];
-    const bool prv_conval_exists = maze_value_has_connection(prv_value, conval);
-    const bool cur_conval_exists = maze_value_has_connection(value, conval);
-    const bool added_conval = !prv_conval_exists && cur_conval_exists;
-    const bool removed_conval = prv_conval_exists && !cur_conval_exists;
-    if (!added_conval && !removed_conval) {
-      continue;
-    }
-    const ge_coord_t nbr_offset = ge_direction_get_offset(MAZE_CONVAL_TO_DIRECTION[conval]);
-    const ge_coord_t nbr_coord = ge_coord_add(coord, nbr_offset);
-    if (!ge_grid_has_coord(mgrid->logic_grid, nbr_coord)) {
-      continue;
-    }
-    const uint8_t nbr_value = ge_grid_get_coord(mgrid->logic_grid, nbr_coord);
-    const maze_conval_t ops_conval = MAZE_CONVAL_TO_OPPOSITE[conval];
-    const uint8_t nxt_value = (added_conval ? maze_value_add_connection(nbr_value, ops_conval)
-                                            : maze_value_remove_connection(nbr_value, ops_conval));
-    ge_grid_set_coord(mgrid->logic_grid, nbr_coord, nxt_value);
-  }
-  // Update the edge bitset
-  const bool prv_edge = maze_value_is_path(prv_value, MAZE_PATHVAL_EDGE);
-  const bool cur_edge = maze_value_is_path(value, MAZE_PATHVAL_EDGE);
-  if (prv_edge != cur_edge) {
-    const size_t width = maze_grid_get_width(mgrid);
-    const size_t bitset_index = width * coord.y + coord.x;
-    ge_bitset_set(mgrid->edge_bitset, bitset_index, cur_edge);
-  }
-  // Update the rendered grid
-  const ge_coord_t render_coord = {2 * coord.x + 1, 2 * coord.y + 1};
-  for (size_t ii = 0; ii < NUM_MAZE_CONVALS; ++ii) {
-    const maze_conval_t conval = MAZE_CONVALS[ii];
-    const ge_coord_t nbr_offset = ge_direction_get_offset(MAZE_CONVAL_TO_DIRECTION[conval]);
-    const ge_coord_t nbr_coord = ge_coord_add(render_coord, nbr_offset);
-    const uint8_t nbr_value = (maze_value_has_connection(value, conval) ? 255 : 0);
-    ge_grid_set_coord(mgrid->render_grid, nbr_coord, nbr_value);
-  }
-}
-
-void maze_grid_set_coord_set_connection(maze_grid_t* mgrid, ge_coord_t coord, maze_conval_t conval)
-{
-  const uint8_t prv_value = ge_grid_get_coord(mgrid->logic_grid, coord);
-  const uint8_t nxt_value = maze_value_set_connection(prv_value, conval);
-  maze_grid_set_coord(mgrid, coord, nxt_value);
-}
-
-void maze_grid_set_coord_add_connection(maze_grid_t* mgrid, ge_coord_t coord, maze_conval_t conval)
-{
-  const uint8_t prv_value = ge_grid_get_coord(mgrid->logic_grid, coord);
-  const uint8_t nxt_value = maze_value_add_connection(prv_value, conval);
-  maze_grid_set_coord(mgrid, coord, nxt_value);
-}
-
-void maze_grid_set_coord_rm_connection(maze_grid_t* mgrid, ge_coord_t coord, maze_conval_t conval)
-{
-  const uint8_t prv_value = ge_grid_get_coord(mgrid->logic_grid, coord);
-  const uint8_t nxt_value = maze_value_remove_connection(prv_value, conval);
-  maze_grid_set_coord(mgrid, coord, nxt_value);
-}
-
-void maze_grid_set_coord_set_path(maze_grid_t* mgrid, ge_coord_t coord, maze_pathval_t pathval)
-{
-  const uint8_t prv_value = ge_grid_get_coord(mgrid->logic_grid, coord);
-  const uint8_t nxt_value = maze_value_set_path(prv_value, pathval);
-  maze_grid_set_coord(mgrid, coord, nxt_value);
-}
-
-uint8_t maze_grid_get_coord_wrapped(const maze_grid_t* mgrid, ge_coord_t coord)
-{
-  return ge_grid_get_coord_wrapped(mgrid->logic_grid, coord);
-}
-
-void maze_grid_set_coord_wrapped(maze_grid_t* mgrid, ge_coord_t coord, uint8_t value)
-{
-  // Reuse the code above for setting a coord
-  coord = ge_coord_wrap(coord, maze_grid_get_width(mgrid), maze_grid_get_height(mgrid));
-  maze_grid_set_coord(mgrid, coord, value);
-}
-
-ge_neighbors_t maze_grid_get_connected_neighbors(const maze_grid_t* mgrid, ge_coord_t coord)
-{
-  const uint8_t value = maze_grid_get_coord(mgrid, coord);
-  const ge_neighbors_t nbrs = ge_grid_get_neighbors(mgrid->logic_grid, coord);
-  ge_neighbors_t connected_nbrs = GE_NEIGHBORS_DEFAULTS;
-  for (size_t ii = 0; ii < NUM_MAZE_CONVALS; ++ii) {
-    const maze_conval_t conval = MAZE_CONVALS[ii];
-    const ge_direction_t direction = MAZE_CONVAL_TO_DIRECTION[conval];
-    // Ignore invalid neighbors, even if connected
-    if (!ge_neighbors_has_neighbor(&nbrs, direction)) {
-      continue;
-    }
-    // Copy connected neighbors to the result
-    if (maze_value_has_connection(value, conval)) {
-      connected_nbrs.neighbors[direction] = nbrs.neighbors[direction];
-    }
-  }
-  return connected_nbrs;
-}
-
-ge_coord_vec_t* maze_grid_get_edge_coords(const maze_grid_t* mgrid)
-{
-  const size_t width = maze_grid_get_width(mgrid);
-  ge_coord_vec_t* edge_coords = ge_coord_vec_create();
-  size_t edge_index = GE_BITSET_SEARCH_INIT;
-  while ((edge_index = ge_bitset_search(mgrid->edge_bitset, edge_index)) != GE_BITSET_SEARCH_INIT) {
-    ge_coord_vec_push_back(edge_coords, (ge_coord_t){edge_index % width, edge_index / width});
-  }
-  return edge_coords;
-}
-
-ge_coord_t maze_grid_next_edge_coord(const maze_grid_t* mgrid, ge_coord_t start_coord)
-{
-  const size_t width = maze_grid_get_width(mgrid);
-  const size_t start_edge_index =
-      (!ge_coord_is_invalid(start_coord) ? width * start_coord.y + start_coord.x
-                                         : GE_BITSET_SEARCH_INIT);
-  const size_t edge_index = ge_bitset_search(mgrid->edge_bitset, start_edge_index);
-  return (edge_index != GE_BITSET_SEARCH_INIT ? (ge_coord_t){edge_index % width, edge_index / width}
-                                              : GE_INVALID_COORD);
-}
-
-void maze_grid_recursive_backtracker(maze_grid_t* mgrid)
-{
-  const size_t width = maze_grid_get_width(mgrid);
-  const size_t height = maze_grid_get_height(mgrid);
+  const size_t width = ge_mz_grid_get_width(grid);
+  const size_t height = ge_mz_grid_get_height(grid);
   // Pick a random point to start
   const ge_coord_t start_coord = {rand() % width, rand() % height};
   // Set up the stack for backtracking
-  const size_t conval_stack_capacity = width * height;
-  uint8_t* const conval_stack = calloc(conval_stack_capacity, sizeof(uint8_t));
-  size_t conval_stack_size = 0;
+  const size_t con_stack_capacity = width * height;
+  uint8_t* const con_stack = calloc(con_stack_capacity, sizeof(uint8_t));
+  size_t con_stack_size = 0;
   // Initialize the stack with the first element
   ge_coord_t coord = start_coord;
-  conval_stack[conval_stack_size++] = MAZE_CONVAL_NORTH;
+  con_stack[con_stack_size++] = GE_MZ_CON_NORTH;
   // Work through the entire stack
-  while (conval_stack_size != 0) {
+  while (con_stack_size != 0) {
     // Check neighbors for unvisited connections
-    const ge_neighbors_t nbrs = ge_grid_get_neighbors(mgrid->logic_grid, coord);
-    maze_conval_t unvisited_convals[NUM_MAZE_CONVALS];
+    const ge_neighbors_t nbrs = ge_mz_grid_get_neighbors(grid, coord);
+    ge_mz_con_t unvisited_cons[GE_MZ_NUM_CONS];
     size_t num_unvisited = 0;
-    for (size_t ii = 0; ii < NUM_MAZE_CONVALS; ++ii) {
-      const maze_conval_t conval = MAZE_CONVALS[ii];
-      const ge_direction_t direction = MAZE_CONVAL_TO_DIRECTION[conval];
+    GE_MZ_FOR_ALL_CONS (con) {
+      const ge_direction_t direction = ge_mz_con_get_direction(con);
       // Invalid coord are treated as visited
       if (!ge_neighbors_has_neighbor(&nbrs, direction)) {
         continue;
       }
       // Push the connection if the cell is unvisisted, e.g., has no connections
       const ge_coord_t nbr_coord = ge_neighbors_get_neighbor(&nbrs, direction);
-      if (maze_value_has_connection(maze_grid_get_coord(mgrid, nbr_coord), MAZE_CONVAL_NONE)) {
-        unvisited_convals[num_unvisited++] = conval;
+      if (ge_mz_value_has_con(ge_mz_grid_get_coord(grid, nbr_coord), GE_MZ_CON_NONE)) {
+        unvisited_cons[num_unvisited++] = con;
       }
     }
     // If all cells have been visited, pop the stack to backtrack
     if (num_unvisited == 0) {
-      const maze_conval_t pop_conval = conval_stack[--conval_stack_size];
-      const ge_coord_t pop_offset = ge_direction_get_offset(MAZE_CONVAL_TO_DIRECTION[pop_conval]);
+      const ge_mz_con_t pop_con = con_stack[--con_stack_size];
+      const ge_coord_t pop_offset = ge_direction_get_offset(ge_mz_con_get_direction(pop_con));
       coord = ge_coord_sub(coord, pop_offset);
       continue;
     }
     // Otherwise, pick a random direction, push onto the stack
-    const maze_conval_t unvisited_conval = unvisited_convals[rand() % num_unvisited];
-    const uint8_t prv_value = maze_grid_get_coord(mgrid, coord);
-    const uint8_t nxt_value = maze_value_add_connection(prv_value, unvisited_conval);
-    maze_grid_set_coord(mgrid, coord, nxt_value);
+    const ge_mz_con_t unvisited_con = unvisited_cons[rand() % num_unvisited];
+    const uint8_t prv_value = ge_mz_grid_get_coord(grid, coord);
+    const uint8_t nxt_value = ge_mz_value_add_con(prv_value, unvisited_con);
+    ge_mz_grid_set_coord(grid, coord, nxt_value);
     const ge_coord_t unvisited_offset =
-        ge_direction_get_offset(MAZE_CONVAL_TO_DIRECTION[unvisited_conval]);
+        ge_direction_get_offset(ge_mz_con_get_direction(unvisited_con));
     coord = ge_coord_add(coord, unvisited_offset);
-    conval_stack[conval_stack_size++] = unvisited_conval;
+    con_stack[con_stack_size++] = unvisited_con;
   }
   // Cleanup once done
-  free(conval_stack);
+  free(con_stack);
 }
 
-void maze_grid_distances(maze_grid_t* mgrid, ge_coord_t start_coord, size_t* dist_grid)
+void dijkstra_distances(ge_mz_grid_t* grid, ge_coord_t start_coord, size_t* dist_grid)
 {
   // It's assumed that dist_grid is already allocated to the right size
-  const size_t width = maze_grid_get_width(mgrid);
-  const size_t height = maze_grid_get_height(mgrid);
+  const size_t width = ge_mz_grid_get_width(grid);
+  const size_t height = ge_mz_grid_get_height(grid);
   // Fill distance grid with max values (approximating infinity)
   for (size_t jj = 0; jj < height; ++jj) {
     for (size_t ii = 0; ii < width; ++ii) {
@@ -396,7 +75,7 @@ void maze_grid_distances(maze_grid_t* mgrid, ge_coord_t start_coord, size_t* dis
     }
   }
   // Set the starting coord as an edge with distance zero
-  maze_grid_set_coord_set_path(mgrid, start_coord, MAZE_PATHVAL_EDGE);
+  ge_mz_grid_set_coord_set_path(grid, start_coord, GE_MZ_PATH_EDGE);
   dist_grid[width * start_coord.y + start_coord.x] = 0;
   // We are done when the edge set is empty
   while (true) {
@@ -404,7 +83,7 @@ void maze_grid_distances(maze_grid_t* mgrid, ge_coord_t start_coord, size_t* dis
     size_t min_dist = SIZE_MAX;
     size_t min_dist_index = SIZE_MAX;
     ge_coord_t edge_coord = GE_INVALID_COORD;
-    while (!ge_coord_is_invalid(edge_coord = maze_grid_next_edge_coord(mgrid, edge_coord))) {
+    while (!ge_coord_is_invalid(edge_coord = ge_mz_grid_next_edge_coord(grid, edge_coord))) {
       const size_t coord_index = width * edge_coord.y + edge_coord.x;
       const size_t coord_dist = dist_grid[coord_index];
       if (coord_dist < min_dist) {
@@ -412,23 +91,23 @@ void maze_grid_distances(maze_grid_t* mgrid, ge_coord_t start_coord, size_t* dis
         min_dist_index = coord_index;
       }
     }
-    // Bail if on an empty edge set
+    // Bail on an empty edge set
     if (min_dist_index == SIZE_MAX) {
       break;
     }
     // Expand the cell with the minimum distance
     const ge_coord_t cur_coord = (ge_coord_t){min_dist_index % width, min_dist_index / width};
     const size_t cur_dist = min_dist;
-    maze_grid_set_coord_set_path(mgrid, cur_coord, MAZE_PATHVAL_VISITED);
+    ge_mz_grid_set_coord_set_path(grid, cur_coord, GE_MZ_PATH_VISITED);
     // Check for unvisited neighbors
-    const ge_neighbors_t nbrs = maze_grid_get_connected_neighbors(mgrid, cur_coord);
+    const ge_neighbors_t nbrs = ge_mz_grid_get_neighbors_connected(grid, cur_coord);
     ge_direction_t nbr_dir = GE_DIRECTION_NONE;
     while ((nbr_dir = ge_neighbors_next_direction(&nbrs, nbr_dir)) != GE_DIRECTION_NONE) {
       const ge_coord_t nbr_coord = ge_neighbors_get_neighbor(&nbrs, nbr_dir);
       // Only process unvisited and edge neighbors
-      const uint8_t nbr_value = maze_grid_get_coord(mgrid, nbr_coord);
-      if (!maze_value_is_path(nbr_value, MAZE_PATHVAL_UNVISITED)
-          && !maze_value_is_path(nbr_value, MAZE_PATHVAL_EDGE)) {
+      const uint8_t nbr_value = ge_mz_grid_get_coord(grid, nbr_coord);
+      if (!ge_mz_value_is_path(nbr_value, GE_MZ_PATH_UNVISITED)
+          && !ge_mz_value_is_path(nbr_value, GE_MZ_PATH_EDGE)) {
         continue;
       }
       // Update distance for the neighbor cell
@@ -437,18 +116,18 @@ void maze_grid_distances(maze_grid_t* mgrid, ge_coord_t start_coord, size_t* dis
         *nbr_dist = cur_dist + 1;
       }
       // Set unvisited nodes to now be edges
-      if (maze_value_is_path(nbr_value, MAZE_PATHVAL_UNVISITED)) {
-        maze_grid_set_coord(mgrid, nbr_coord, maze_value_set_path(nbr_value, MAZE_PATHVAL_EDGE));
+      if (ge_mz_value_is_path(nbr_value, GE_MZ_PATH_UNVISITED)) {
+        ge_mz_grid_set_coord(grid, nbr_coord, ge_mz_value_set_path(nbr_value, GE_MZ_PATH_EDGE));
       }
     }
   }
 }
 
-void maze_grid_render_distances(const maze_grid_t* mgrid, size_t* dist_grid)
+void render_distances(ge_mz_grid_t* grid, size_t* dist_grid)
 {
   // It's assumed that dist_grid is already allocated to the right size
-  const size_t width = maze_grid_get_width(mgrid);
-  const size_t height = maze_grid_get_height(mgrid);
+  const size_t width = ge_mz_grid_get_width(grid);
+  const size_t height = ge_mz_grid_get_height(grid);
   // Find the maximum distance to scale everything to
   size_t max_dist = 0;
   for (size_t jj = 0; jj < height; ++jj) {
@@ -458,21 +137,22 @@ void maze_grid_render_distances(const maze_grid_t* mgrid, size_t* dist_grid)
     }
   }
   // Color the distances according to the palette
+  ge_grid_t* const render_grid = ge_mz_grid_get_render_grid(grid);
   for (size_t jj = 0; jj < height; ++jj) {
     for (size_t ii = 0; ii < width; ++ii) {
       const ge_coord_t coord = {ii, jj};
       const size_t dist_value =
           (MAZE_RENDER_VALUE_HIGH * dist_grid[width * jj + ii]) / max_dist + MAZE_RENDER_VALUE_LOW;
       const ge_coord_t render_coord = {2 * coord.x + 1, 2 * coord.y + 1};
-      ge_grid_set_coord(mgrid->render_grid, render_coord, dist_value);
-      const uint8_t value = maze_grid_get_coord(mgrid, coord);
-      if (maze_value_has_connection(value, MAZE_CONVAL_EAST)) {
+      ge_grid_set_coord(render_grid, render_coord, dist_value);
+      const uint8_t value = ge_mz_grid_get_coord(grid, coord);
+      if (ge_mz_value_has_con(value, GE_MZ_CON_EAST)) {
         const ge_coord_t render_coord_east = {2 * coord.x + 2, 2 * coord.y + 1};
-        ge_grid_set_coord(mgrid->render_grid, render_coord_east, dist_value);
+        ge_grid_set_coord(render_grid, render_coord_east, dist_value);
       }
-      if (maze_value_has_connection(value, MAZE_CONVAL_SOUTH)) {
+      if (ge_mz_value_has_con(value, GE_MZ_CON_SOUTH)) {
         const ge_coord_t render_coord_south = {2 * coord.x + 1, 2 * coord.y + 2};
-        ge_grid_set_coord(mgrid->render_grid, render_coord_south, dist_value);
+        ge_grid_set_coord(render_grid, render_coord_south, dist_value);
       }
     }
   }
@@ -482,18 +162,18 @@ int main(void)
 {
   const size_t width = 100;
   const size_t height = 100;
-  maze_grid_t* const mgrid = maze_grid_create(width, height);
+  ge_mz_grid_t* const grid = ge_mz_grid_create(width, height);
   // Do maze generation
-  maze_grid_recursive_backtracker(mgrid);
+  recursive_backtracker(grid);
   // Find distances and render them
   size_t* const dist_grid = calloc(width * height, sizeof(size_t));
   GE_LOG_INFO("Finding distances...");
-  maze_grid_distances(mgrid, (ge_coord_t){0, 0}, dist_grid);
+  dijkstra_distances(grid, (ge_coord_t){0, 0}, dist_grid);
   GE_LOG_INFO("Rendering distances...");
-  maze_grid_render_distances(mgrid, dist_grid);
+  render_distances(grid, dist_grid);
   // The EZ loop data
   ez_loop_data_t ez_loop_data = {
-      .grid = mgrid->render_grid,
+      .grid = ge_mz_grid_get_render_grid(grid),
       .palette = &GE_PALETTE_INFERNO,
       .user_data = NULL,
       .loop_func = NULL,
@@ -502,6 +182,6 @@ int main(void)
   // RUN THE LOOP!
   const int result = ge_ez_loop(&ez_loop_data);
   free(dist_grid);
-  maze_grid_free(mgrid);
+  ge_mz_grid_free(grid);
   return result;
 }

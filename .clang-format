@@ -17,4 +17,9 @@ AllowShortFunctionsOnASingleLine: Empty
 BreakBeforeBinaryOperators: NonAssignment
 IndentCaseLabels: false
 SpaceAfterCStyleCast: true
+
+# Use these foreach macros
+ForEachMacros:
+  - GE_MZ_FOR_ALL_CONS
+  - GE_MZ_FOR_ALL_PATHS
 ...
