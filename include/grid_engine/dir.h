@@ -27,6 +27,10 @@ typedef enum ge_dir {
   GE_DIR_ALL,   // Special value to indicate all directions
 } ge_dir_t;
 
+// Take advantage of the enum layout to make these as simple as possible
+#define GE_FOR_ALL_DIRS(DIR) for (ge_dir_t DIR = 0; DIR < GE_NUM_DIRS; ++DIR)
+#define GE_FOR_NESW_DIRS(DIR) for (ge_dir_t DIR = 0; DIR < GE_NUM_DIRS; DIR += 2)
+
 ge_dir_t ge_dir_get_opposite(ge_dir_t dir);
 ge_coord_t ge_dir_get_offset(ge_dir_t dir);
 
