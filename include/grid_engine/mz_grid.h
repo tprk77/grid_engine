@@ -12,7 +12,7 @@
 #include "grid_engine/coord.h"
 #include "grid_engine/coord_vec.h"
 #include "grid_engine/grid.h"
-#include "grid_engine/neighbors.h"
+#include "grid_engine/nbrs.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,7 +36,7 @@ extern const ge_mz_con_t GE_MZ_CONS[GE_MZ_NUM_CONS];
 
 uint8_t ge_mz_con_to_bits(ge_mz_con_t con);
 ge_mz_con_t ge_mz_con_get_opposite(ge_mz_con_t con);
-ge_direction_t ge_mz_con_get_direction(ge_mz_con_t con);
+ge_dir_t ge_mz_con_get_dir(ge_mz_con_t con);
 
 uint8_t ge_mz_value_set_con(uint8_t value, ge_mz_con_t con);
 uint8_t ge_mz_value_add_con(uint8_t value, ge_mz_con_t con);
@@ -78,8 +78,8 @@ void ge_mz_grid_set_con_at_coord(ge_mz_grid_t* grid, ge_coord_t coord, ge_mz_con
 void ge_mz_grid_add_con_at_coord(ge_mz_grid_t* grid, ge_coord_t coord, ge_mz_con_t con);
 void ge_mz_grid_rm_con_at_coord(ge_mz_grid_t* grid, ge_coord_t coord, ge_mz_con_t con);
 void ge_mz_grid_set_coord_set_path(ge_mz_grid_t* grid, ge_coord_t coord, ge_mz_path_t path);
-ge_neighbors_t ge_mz_grid_get_neighbors(const ge_mz_grid_t* grid, ge_coord_t coord);
-ge_neighbors_t ge_mz_grid_get_neighbors_connected(const ge_mz_grid_t* grid, ge_coord_t coord);
+ge_nbrs_t ge_mz_grid_get_nbrs(const ge_mz_grid_t* grid, ge_coord_t coord);
+ge_nbrs_t ge_mz_grid_get_nbrs_connected(const ge_mz_grid_t* grid, ge_coord_t coord);
 ge_coord_vec_t* ge_mz_grid_get_edge_coords(const ge_mz_grid_t* grid);
 ge_coord_t ge_mz_grid_next_edge_coord(const ge_mz_grid_t* grid, ge_coord_t start_coord);
 

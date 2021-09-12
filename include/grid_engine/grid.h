@@ -10,7 +10,7 @@
 #include <stdint.h>
 
 #include "grid_engine/coord.h"
-#include "grid_engine/neighbors.h"
+#include "grid_engine/nbrs.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,8 +31,8 @@ uint8_t ge_grid_get_coord(const ge_grid_t* grid, ge_coord_t coord);
 void ge_grid_set_coord(ge_grid_t* grid, ge_coord_t coord, uint8_t value);
 uint8_t ge_grid_get_coord_wrapped(const ge_grid_t* grid, ge_coord_t coord);
 void ge_grid_set_coord_wrapped(ge_grid_t* grid, ge_coord_t coord, uint8_t value);
-ge_neighbors_t ge_grid_get_neighbors(const ge_grid_t* grid, ge_coord_t coord);
-ge_neighbors_t ge_grid_get_neighbors_wrapped(const ge_grid_t* grid, ge_coord_t coord);
+ge_nbrs_t ge_grid_get_nbrs(const ge_grid_t* grid, ge_coord_t coord);
+ge_nbrs_t ge_grid_get_nbrs_wrapped(const ge_grid_t* grid, ge_coord_t coord);
 
 #ifdef __cplusplus
 }

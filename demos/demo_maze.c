@@ -27,17 +27,17 @@ void recursive_backtracker(ge_mz_grid_t* grid)
   // Work through the entire stack
   while (con_stack_size != 0) {
     // Check neighbors for unvisited connections
-    const ge_neighbors_t nbrs = ge_mz_grid_get_neighbors(grid, coord);
+    const ge_nbrs_t nbrs = ge_mz_grid_get_nbrs(grid, coord);
     ge_mz_con_t unvisited_cons[GE_MZ_NUM_CONS];
     size_t num_unvisited = 0;
     GE_MZ_FOR_ALL_CONS (con) {
-      const ge_direction_t direction = ge_mz_con_get_direction(con);
+      const ge_dir_t dir = ge_mz_con_get_dir(con);
       // Invalid coord are treated as visited
-      if (!ge_neighbors_has_neighbor(&nbrs, direction)) {
+      if (!ge_nbrs_has_nbr(&nbrs, dir)) {
         continue;
       }
       // Push the connection if the cell is unvisisted, e.g., has no connections
-      const ge_coord_t nbr_coord = ge_neighbors_get_neighbor(&nbrs, direction);
+      const ge_coord_t nbr_coord = ge_nbrs_get_nbr(&nbrs, dir);
       if (ge_mz_value_has_con(ge_mz_grid_get_coord(grid, nbr_coord), GE_MZ_CON_NONE)) {
         unvisited_cons[num_unvisited++] = con;
       }
@@ -45,7 +45,7 @@ void recursive_backtracker(ge_mz_grid_t* grid)
     // If all cells have been visited, pop the stack to backtrack
     if (num_unvisited == 0) {
       const ge_mz_con_t pop_con = con_stack[--con_stack_size];
-      const ge_coord_t pop_offset = ge_direction_get_offset(ge_mz_con_get_direction(pop_con));
+      const ge_coord_t pop_offset = ge_dir_get_offset(ge_mz_con_get_dir(pop_con));
       coord = ge_coord_sub(coord, pop_offset);
       continue;
     }
@@ -54,8 +54,7 @@ void recursive_backtracker(ge_mz_grid_t* grid)
     const uint8_t prv_value = ge_mz_grid_get_coord(grid, coord);
     const uint8_t nxt_value = ge_mz_value_add_con(prv_value, unvisited_con);
     ge_mz_grid_set_coord(grid, coord, nxt_value);
-    const ge_coord_t unvisited_offset =
-        ge_direction_get_offset(ge_mz_con_get_direction(unvisited_con));
+    const ge_coord_t unvisited_offset = ge_dir_get_offset(ge_mz_con_get_dir(unvisited_con));
     coord = ge_coord_add(coord, unvisited_offset);
     con_stack[con_stack_size++] = unvisited_con;
   }
@@ -100,10 +99,10 @@ void dijkstra_distances(ge_mz_grid_t* grid, ge_coord_t start_coord, size_t* dist
     const size_t cur_dist = min_dist;
     ge_mz_grid_set_coord_set_path(grid, cur_coord, GE_MZ_PATH_VISITED);
     // Check for unvisited neighbors
-    const ge_neighbors_t nbrs = ge_mz_grid_get_neighbors_connected(grid, cur_coord);
-    ge_direction_t nbr_dir = GE_DIRECTION_NONE;
-    while ((nbr_dir = ge_neighbors_next_direction(&nbrs, nbr_dir)) != GE_DIRECTION_NONE) {
-      const ge_coord_t nbr_coord = ge_neighbors_get_neighbor(&nbrs, nbr_dir);
+    const ge_nbrs_t nbrs = ge_mz_grid_get_nbrs_connected(grid, cur_coord);
+    ge_dir_t nbr_dir = GE_DIR_NONE;
+    while ((nbr_dir = ge_nbrs_next_dir(&nbrs, nbr_dir)) != GE_DIR_NONE) {
+      const ge_coord_t nbr_coord = ge_nbrs_get_nbr(&nbrs, nbr_dir);
       // Only process unvisited and edge neighbors
       const uint8_t nbr_value = ge_mz_grid_get_coord(grid, nbr_coord);
       if (!ge_mz_value_is_path(nbr_value, GE_MZ_PATH_UNVISITED)
