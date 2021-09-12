@@ -113,16 +113,16 @@ void ge_grid_set_coord_wrapped(ge_grid_t* grid, ge_coord_t coord, uint8_t value)
   ge_grid_set_coord(grid, coord, value);
 }
 
-ge_neighbors_t ge_grid_get_neighbors(const ge_grid_t* grid, ge_coord_t coord)
+ge_nbrs_t ge_grid_get_nbrs(const ge_grid_t* grid, ge_coord_t coord)
 {
   abort_on_out_of_bounds(grid, coord);
-  return ge_neighbors_from_coord_inside(coord, grid->width, grid->height);
+  return ge_nbrs_from_coord_inside(coord, grid->width, grid->height);
 }
 
-ge_neighbors_t ge_grid_get_neighbors_wrapped(const ge_grid_t* grid, ge_coord_t coord)
+ge_nbrs_t ge_grid_get_nbrs_wrapped(const ge_grid_t* grid, ge_coord_t coord)
 {
   abort_on_out_of_bounds(grid, coord);
-  return ge_neighbors_from_coord_wrapped(coord, grid->width, grid->height);
+  return ge_nbrs_from_coord_wrapped(coord, grid->width, grid->height);
 }
 
 static void abort_on_out_of_bounds(const ge_grid_t* grid, ge_coord_t coord)

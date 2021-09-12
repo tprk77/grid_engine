@@ -45,11 +45,11 @@ static const ge_mz_con_t GE_MZ_CON_TO_OPPOSITE[GE_MZ_NUM_CONS] = {
     GE_MZ_CON_EAST,
 };
 
-static const ge_direction_t GE_MZ_CON_TO_DIRECTION[GE_MZ_NUM_CONS] = {
-    GE_DIRECTION_NORTH,
-    GE_DIRECTION_EAST,
-    GE_DIRECTION_SOUTH,
-    GE_DIRECTION_WEST,
+static const ge_dir_t GE_MZ_CON_TO_DIR[GE_MZ_NUM_CONS] = {
+    GE_DIR_NORTH,
+    GE_DIR_EAST,
+    GE_DIR_SOUTH,
+    GE_DIR_WEST,
 };
 
 const ge_mz_path_t GE_MZ_PATHS[GE_MZ_NUM_PATHS] = {
@@ -83,9 +83,9 @@ ge_mz_con_t ge_mz_con_get_opposite(ge_mz_con_t con)
   return GE_MZ_CON_TO_OPPOSITE[con];
 }
 
-ge_direction_t ge_mz_con_get_direction(ge_mz_con_t con)
+ge_dir_t ge_mz_con_get_dir(ge_mz_con_t con)
 {
-  return GE_MZ_CON_TO_DIRECTION[con];
+  return GE_MZ_CON_TO_DIR[con];
 }
 
 uint8_t ge_mz_value_set_con(uint8_t value, ge_mz_con_t con)
@@ -244,7 +244,7 @@ void ge_mz_grid_set_coord(ge_mz_grid_t* grid, ge_coord_t coord, uint8_t value)
     if (!added_con && !removed_con) {
       continue;
     }
-    const ge_coord_t nbr_offset = ge_direction_get_offset(GE_MZ_CON_TO_DIRECTION[con]);
+    const ge_coord_t nbr_offset = ge_dir_get_offset(GE_MZ_CON_TO_DIR[con]);
     const ge_coord_t nbr_coord = ge_coord_add(coord, nbr_offset);
     if (!ge_grid_has_coord(grid->logic_grid, nbr_coord)) {
       continue;
@@ -267,7 +267,7 @@ void ge_mz_grid_set_coord(ge_mz_grid_t* grid, ge_coord_t coord, uint8_t value)
   const ge_coord_t render_coord = {2 * coord.x + 1, 2 * coord.y + 1};
   for (size_t ii = 0; ii < GE_MZ_NUM_CONS; ++ii) {
     const ge_mz_con_t con = GE_MZ_CONS[ii];
-    const ge_coord_t nbr_offset = ge_direction_get_offset(GE_MZ_CON_TO_DIRECTION[con]);
+    const ge_coord_t nbr_offset = ge_dir_get_offset(GE_MZ_CON_TO_DIR[con]);
     const ge_coord_t nbr_coord = ge_coord_add(render_coord, nbr_offset);
     const uint8_t nbr_value = (ge_mz_value_has_con(value, con) ? 255 : 0);
     ge_grid_set_coord(grid->render_grid, nbr_coord, nbr_value);
@@ -302,26 +302,26 @@ void ge_mz_grid_set_coord_set_path(ge_mz_grid_t* grid, ge_coord_t coord, ge_mz_p
   ge_mz_grid_set_coord(grid, coord, nxt_value);
 }
 
-ge_neighbors_t ge_mz_grid_get_neighbors(const ge_mz_grid_t* grid, ge_coord_t coord)
+ge_nbrs_t ge_mz_grid_get_nbrs(const ge_mz_grid_t* grid, ge_coord_t coord)
 {
-  return ge_grid_get_neighbors(grid->logic_grid, coord);
+  return ge_grid_get_nbrs(grid->logic_grid, coord);
 }
 
-ge_neighbors_t ge_mz_grid_get_neighbors_connected(const ge_mz_grid_t* grid, ge_coord_t coord)
+ge_nbrs_t ge_mz_grid_get_nbrs_connected(const ge_mz_grid_t* grid, ge_coord_t coord)
 {
   const uint8_t value = ge_grid_get_coord(grid->logic_grid, coord);
-  const ge_neighbors_t nbrs = ge_grid_get_neighbors(grid->logic_grid, coord);
-  ge_neighbors_t connected_nbrs = GE_NEIGHBORS_DEFAULTS;
+  const ge_nbrs_t nbrs = ge_grid_get_nbrs(grid->logic_grid, coord);
+  ge_nbrs_t connected_nbrs = GE_NBRS_DEFAULTS;
   for (size_t ii = 0; ii < GE_MZ_NUM_CONS; ++ii) {
     const ge_mz_con_t con = GE_MZ_CONS[ii];
-    const ge_direction_t direction = GE_MZ_CON_TO_DIRECTION[con];
+    const ge_dir_t dir = GE_MZ_CON_TO_DIR[con];
     // Ignore invalid neighbors, even if connected
-    if (!ge_neighbors_has_neighbor(&nbrs, direction)) {
+    if (!ge_nbrs_has_nbr(&nbrs, dir)) {
       continue;
     }
     // Copy connected neighbors to the result
     if (ge_mz_value_has_con(value, con)) {
-      connected_nbrs.neighbors[direction] = nbrs.neighbors[direction];
+      connected_nbrs.nbrs[dir] = nbrs.nbrs[dir];
     }
   }
   return connected_nbrs;
