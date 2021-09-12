@@ -12,10 +12,10 @@ typedef struct user_data {
   ge_grid_t* temp_grid;
 } user_data_t;
 
-bool gol_cell_live(bool is_live, size_t num_live_neighbors)
+bool gol_cell_live(bool is_live, size_t num_live_nbrs)
 {
   if (is_live) {
-    if (num_live_neighbors < 2 || num_live_neighbors > 3) {
+    if (num_live_nbrs < 2 || num_live_nbrs > 3) {
       return false;
     }
     else {
@@ -23,7 +23,7 @@ bool gol_cell_live(bool is_live, size_t num_live_neighbors)
     }
   }
   else {
-    if (num_live_neighbors == 3) {
+    if (num_live_nbrs == 3) {
       return true;
     }
     else {
