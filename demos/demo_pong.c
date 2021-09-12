@@ -488,14 +488,14 @@ void process_bounces(ge_grid_t* grid, user_data_t* user_data)
   if (user_data->ball_heading == HEADING_NONE) {
     return;
   }
-  const ge_coord_t neighbor_north = ge_coord_add(user_data->ball_coord, (ge_coord_t){0, -1});
-  const ge_coord_t neighbor_east = ge_coord_add(user_data->ball_coord, (ge_coord_t){1, 0});
-  const ge_coord_t neighbor_south = ge_coord_add(user_data->ball_coord, (ge_coord_t){0, 1});
-  const ge_coord_t neighbor_west = ge_coord_add(user_data->ball_coord, (ge_coord_t){-1, 0});
-  const uint8_t value_north = ge_grid_get_coord_wrapped(grid, neighbor_north);
-  const uint8_t value_east = ge_grid_get_coord_wrapped(grid, neighbor_east);
-  const uint8_t value_south = ge_grid_get_coord_wrapped(grid, neighbor_south);
-  const uint8_t value_west = ge_grid_get_coord_wrapped(grid, neighbor_west);
+  const ge_coord_t nbr_north = ge_coord_add(user_data->ball_coord, (ge_coord_t){0, -1});
+  const ge_coord_t nbr_east = ge_coord_add(user_data->ball_coord, (ge_coord_t){1, 0});
+  const ge_coord_t nbr_south = ge_coord_add(user_data->ball_coord, (ge_coord_t){0, 1});
+  const ge_coord_t nbr_west = ge_coord_add(user_data->ball_coord, (ge_coord_t){-1, 0});
+  const uint8_t value_north = ge_grid_get_coord_wrapped(grid, nbr_north);
+  const uint8_t value_east = ge_grid_get_coord_wrapped(grid, nbr_east);
+  const uint8_t value_south = ge_grid_get_coord_wrapped(grid, nbr_south);
+  const uint8_t value_west = ge_grid_get_coord_wrapped(grid, nbr_west);
   if (value_north >= VALUE_ON) {
     user_data->ball_heading = BOUNCE_SOUTH[user_data->ball_heading];
     user_data->ball_heading = heading_apply_hit(user_data->ball_heading, value_north);
