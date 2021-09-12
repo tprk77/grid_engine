@@ -65,6 +65,10 @@ ge_coord_t ge_nbrs_get_nbr(const ge_nbrs_t* nbrs, ge_dir_t dir);
  */
 ge_dir_t ge_nbrs_next_dir(const ge_nbrs_t* nbrs, ge_dir_t prev_dir);
 
+// Allow easier use of the function above using a macro
+#define GE_FOR_NBR_DIRS(NBR_DIR, NBRS) \
+  for (ge_dir_t NBR_DIR = GE_DIR_NONE; (NBR_DIR = ge_nbrs_next_dir(NBRS, NBR_DIR)) != GE_DIR_NONE;)
+
 #ifdef __cplusplus
 }
 #endif

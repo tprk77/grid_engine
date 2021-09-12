@@ -20,6 +20,9 @@ SpaceAfterCStyleCast: true
 
 # Use these foreach macros
 ForEachMacros:
+  - GE_FOR_ALL_DIRS
+  - GE_FOR_NBR_DIRS
+  - GE_FOR_NESW_DIRS
   - GE_MZ_FOR_ALL_CONS
   - GE_MZ_FOR_ALL_PATHS
 ...
