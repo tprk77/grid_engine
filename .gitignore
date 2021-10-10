@@ -5,8 +5,10 @@
 /scratch/
 /scratch.*
 
-# CCLS
-/.ccls-cache
+# LSP, etc
+/.cache/
+/.ccls-cache/
+/.clangd/
 /compile_commands.json
 
 # Temporary files
