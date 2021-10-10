@@ -82,6 +82,17 @@ ge_dir_t ge_nbrs_next_dir(const ge_nbrs_t* nbrs, ge_dir_t prev_dir)
   return (ii != GE_NUM_DIRS ? (ge_dir_t) ii : GE_DIR_NONE);
 }
 
+const ge_coord_t* ge_nbrs_next_coord(const ge_nbrs_t* nbrs, const ge_coord_t* prev_coord)
+{
+  const ge_coord_t* const begin_coord = nbrs->nbrs;
+  const ge_coord_t* const end_coord = nbrs->nbrs + GE_NUM_DIRS;
+  const ge_coord_t* coord = (prev_coord == NULL ? begin_coord : prev_coord + 1);
+  while (coord < end_coord && ge_coord_is_invalid(*coord)) {
+    ++coord;
+  }
+  return (coord != end_coord ? coord : NULL);
+}
+
 static bool coord_inside(ge_coord_t coord, size_t width, size_t height)
 {
   return (coord.x >= 0 && coord.x < (ptrdiff_t) width && coord.y >= 0
