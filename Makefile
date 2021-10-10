@@ -89,7 +89,7 @@ GE_IMPLIB_GE := $(if $(IS_WIN),$(GE_BLD_DIR)/libgrid_engine.dll.a,)
 GE_WIN_OUT_IMPLIB := -Wl,--out-implib,$(GE_IMPLIB_GE)
 GE_OUT_IMPLIB := $(if $(GE_IMPLIB_GE),$(GE_WIN_OUT_IMPLIB),)
 
-SDL_LIBS := -lSDL2
+SDL_LIBS := -lSDL2_image -lSDL2
 
 $(GE_BLD_DIR):
 > $(MKDIR) -p $@
