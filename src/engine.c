@@ -6,6 +6,7 @@
 #include "grid_engine/engine.h"
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 #include "grid_engine/log.h"
 
@@ -49,6 +50,10 @@ ge_error_t ge_init(void)
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     return GE_ERROR_ENGINE_INIT;
   }
+  const int img_init_flags = (IMG_INIT_JPG | IMG_INIT_PNG);
+  if ((IMG_Init(img_init_flags) & img_init_flags) != img_init_flags) {
+    return GE_ERROR_ENGINE_INIT;
+  }
   ge_engine = GE_ENGINE_DEFAULTS;
   ge_engine.inited = true;
   return GE_OK;
@@ -61,6 +66,7 @@ void ge_quit(void)
   }
   GE_LOG_INFO("Grid engine is exiting!");
   SDL_Quit();
+  IMG_Quit();
   ge_engine.inited = false;
 }
 
