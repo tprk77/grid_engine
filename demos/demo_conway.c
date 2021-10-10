@@ -52,9 +52,7 @@ void conway_loop_func(ge_grid_t* grid, void* user_data_, uint32_t time_ms)
       const bool is_live = (ge_grid_get_coord(grid, coord) != 0);
       const ge_nbrs_t nbrs = ge_grid_get_nbrs_wrapped(grid, coord);
       size_t num_live_nbrs = 0;
-      ge_dir_t nbr_dir = GE_DIR_NONE;
-      while ((nbr_dir = ge_nbrs_next_dir(&nbrs, nbr_dir)) != GE_DIR_NONE) {
-        const ge_coord_t nbr_coord = ge_nbrs_get_nbr(&nbrs, nbr_dir);
+      GE_FOR_NBR_COORDS (nbr_coord, &nbrs) {
         if (ge_grid_get_coord(grid, nbr_coord) != 0) {
           ++num_live_nbrs;
         }
