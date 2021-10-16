@@ -9,6 +9,9 @@ on:
     branches:
       - master
       - wip
+  schedule:
+    # Run at least once a month
+    - cron: '0 10 1 * *'
 
 jobs:
   ubuntu-build:
