@@ -36,27 +36,33 @@ ge_coord_t ge_coord_clamp(ge_coord_t coord, size_t width, size_t height)
   const ptrdiff_t last_col = width > 0 ? width - 1 : 0;
   const ptrdiff_t last_row = height > 0 ? height - 1 : 0;
   return (ge_coord_t){
-      .x = pd_max(0, pd_min(coord.x, last_col)),
-      .y = pd_max(0, pd_min(coord.y, last_row)),
+      pd_max(0, pd_min(coord.x, last_col)),
+      pd_max(0, pd_min(coord.y, last_row)),
   };
 }
 
 ge_coord_t ge_coord_wrap(ge_coord_t coord, size_t width, size_t height)
 {
   return (ge_coord_t){
-      .x = pd_mod(coord.x, width),
-      .y = pd_mod(coord.y, height),
+      pd_mod(coord.x, width),
+      pd_mod(coord.y, height),
   };
 }
 
-bool ge_coord_equals(ge_coord_t coord, ge_coord_t other_coord)
+bool ge_coord_equals(ge_coord_t coord, ge_coord_t other)
 {
-  return (coord.x == other_coord.x && coord.y == other_coord.y);
+  return (coord.x == other.x && coord.y == other.y);
 }
 
 bool ge_coord_is_invalid(ge_coord_t coord)
 {
   return ge_coord_equals(coord, GE_INVALID_COORD);
+}
+
+bool ge_coord_within(ge_coord_t coord, size_t width, size_t height)
+{
+  return ((0 <= coord.x && coord.x < (ptrdiff_t) width)
+          && (0 <= coord.y && coord.y < (ptrdiff_t) height));
 }
 
 static ptrdiff_t pd_min(ptrdiff_t a, ptrdiff_t b)
