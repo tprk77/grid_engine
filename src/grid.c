@@ -53,6 +53,11 @@ size_t ge_grid_get_height(const ge_grid_t* grid)
   return grid->height;
 }
 
+ge_rect_t ge_grid_get_rect(const ge_grid_t* grid)
+{
+  return ge_rect_from_wh(grid->width, grid->height);
+}
+
 const uint8_t* ge_grid_get_pixel_arr(const ge_grid_t* grid)
 {
   return grid->pixel_arr;
@@ -123,6 +128,46 @@ ge_nbrs_t ge_grid_get_nbrs_wrapped(const ge_grid_t* grid, ge_coord_t coord)
 {
   abort_on_out_of_bounds(grid, coord);
   return ge_nbrs_from_coord_wrapped(coord, grid->width, grid->height);
+}
+
+ge_grid_t* ge_grid_copy_rect(const ge_grid_t* grid, ge_rect_t rect)
+{
+  // Check that the rect is actually within the grid
+  const ge_rect_t grid_rect = ge_grid_get_rect(grid);
+  if (!ge_rect_within_rect(grid_rect, rect)) {
+    return NULL;
+  }
+  // Create the grid and copy data
+  const size_t width = ge_rect_get_width(rect);
+  const size_t height = ge_rect_get_height(rect);
+  ge_grid_t* const copy_grid = ge_grid_create(width, height);
+  for (size_t jj = 0; jj < height; ++jj) {
+    uint8_t* const src_pixel_row =
+        grid->pixel_arr + (grid->width * (jj + rect.min_coord.y)) + rect.min_coord.x;
+    uint8_t* const dest_pixel_row = copy_grid->pixel_arr + (width * jj);
+    memcpy(dest_pixel_row, src_pixel_row, width);
+  }
+  return copy_grid;
+}
+
+void ge_grid_blit(ge_grid_t* grid, const ge_grid_t* blit_grid, ge_coord_t coord)
+{
+  // Get rect overlapping the grid
+  const ge_rect_t grid_rect = ge_grid_get_rect(grid);
+  const ge_rect_t blit_grid_rect = ge_rect_add(ge_grid_get_rect(blit_grid), coord);
+  const ge_rect_t overlap_rect = ge_rect_overlap(grid_rect, blit_grid_rect);
+  const ge_rect_t blit_rect = ge_rect_sub(overlap_rect, coord);
+  const size_t blit_width = ge_rect_get_width(blit_rect);
+  const size_t blit_height = ge_rect_get_height(blit_rect);
+  for (size_t jj = 0; jj < blit_height; ++jj) {
+    uint8_t* const src_pixel_row =
+        (blit_grid->pixel_arr + (blit_grid->width * (jj + blit_rect.min_coord.y))
+         + blit_rect.min_coord.x);
+    uint8_t* const dest_pixel_row =
+        (grid->pixel_arr + (grid->width * (jj + overlap_rect.min_coord.y))
+         + overlap_rect.min_coord.x);
+    memcpy(dest_pixel_row, src_pixel_row, blit_width);
+  }
 }
 
 static void abort_on_out_of_bounds(const ge_grid_t* grid, ge_coord_t coord)
