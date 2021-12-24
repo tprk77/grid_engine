@@ -36,7 +36,8 @@ readonly GIT_ROOT="$(cd "${SCRIPT_DIR}" && git rev-parse --show-toplevel)"
 function show_usage {
     cat <<EOF 1>&2
 Usage: $(basename "$0") [-a | --all] [-d | --diff] [-u | --upstream]
-            [-n | --preview] [-c | --clang] [-h | --help]
+            [-n | --preview] [-c | --clang] [-t | --time]
+            [-h | --help]
 
 Formats source code for C (*.h, *.c), C++ (*.hpp, *.cpp), etc.
 
@@ -45,11 +46,32 @@ Formats source code for C (*.h, *.c), C++ (*.hpp, *.cpp), etc.
     -u | --upstream Format only changed source files from upstream
     -n | --preview  Display paths of source files to be formatted
     -c | --clang    Display clang-format command and exit
+    -t | --time     Display the run time of the script
     -h | --help     Display this help message
 
 Always remember to format your code! ;-)
 
 EOF
+}
+
+# Display the run time of the script on exit
+show_run_time=0
+readonly script_start_time="$(date +%s%6N)"
+trap display_run_time EXIT
+function display_run_time {
+    # Do not show on errors, or when the option was not set
+    err="$?"
+    if [ "${err}" -ne 0 -o "${show_run_time}" -eq 0 ]; then
+        return
+    fi
+    # Calculate the run time and display it
+    readonly script_end_time="$(date +%s%6N)"
+    readonly delta_time="$(("${script_end_time}" - "${script_start_time}"))"
+    readonly delta_time_sec="$(echo | awk "{printf \"%0.3f\", ${delta_time}/1000000}")"
+    readonly ESC_BOLD="$(tput bold)"
+    readonly ESC_NORM="$(tput sgr0)"
+    echo -e "${ESC_BOLD}${delta_time_sec} secs${ESC_NORM}" 1>&2
+    show_run_time=0
 }
 
 function detect_clang_format {
@@ -85,6 +107,7 @@ for arg in "${@}"; do
         "--upstream" ) set -- "${@}" "-u" ;;
         "--preview" ) set -- "${@}" "-n" ;;
         "--clang" ) set -- "${@}" "-c" ;;
+        "--time" ) set -- "${@}" "-t" ;;
         "--help" ) set -- "${@}" "-h" ;;
         * ) set -- "${@}" "${arg}" ;;
     esac
@@ -92,14 +115,15 @@ for arg in "${@}"; do
 done
 
 # Parse short options using getopts
-while getopts "adunch" arg &>/dev/null; do
+while getopts "aduncth" arg &>/dev/null; do
     case "${arg}" in
         "a" ) format_mode="ALL" ;;
         "d" ) format_mode="DIFF" ;;
         "u" ) format_mode="UPSTREAM" ;;
         "n" ) show_preview=1 ;;
         "c" ) show_clang=1 ;;
-        "h" ) show_usage ; exit 0 ;;
+        "t" ) show_run_time=1 ;;
+        "h" ) show_usage ; show_run_time=0 ; exit 0 ;;
         "?" ) show_usage ; exit 1 ;;
     esac
 done
