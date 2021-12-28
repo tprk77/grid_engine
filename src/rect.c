@@ -36,6 +36,35 @@ size_t ge_rect_get_height(ge_rect_t rect)
   return rect.max_coord.y - rect.min_coord.y;
 }
 
+ge_rect_t ge_rect_set_coord(ge_rect_t rect, ge_coord_t coord)
+{
+  const ge_coord_t offset_coord = ge_coord_sub(rect.max_coord, rect.min_coord);
+  return (ge_rect_t){
+      coord,
+      ge_coord_add(coord, offset_coord),
+  };
+}
+
+ge_rect_t ge_rect_set_width(ge_rect_t rect, size_t width)
+{
+  const size_t height = rect.max_coord.y - rect.min_coord.y;
+  const ge_coord_t offset_coord = {width, height};
+  return (ge_rect_t){
+      rect.min_coord,
+      ge_coord_add(rect.min_coord, offset_coord),
+  };
+}
+
+ge_rect_t ge_rect_set_height(ge_rect_t rect, size_t height)
+{
+  const size_t width = rect.max_coord.x - rect.min_coord.x;
+  const ge_coord_t offset_coord = {width, height};
+  return (ge_rect_t){
+      rect.min_coord,
+      ge_coord_add(rect.min_coord, offset_coord),
+  };
+}
+
 ge_rect_t ge_rect_add(ge_rect_t rect, ge_coord_t coord)
 {
   return (ge_rect_t){
