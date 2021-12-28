@@ -42,6 +42,8 @@ ge_rect_t ge_rect_set_width(ge_rect_t rect, size_t width);
 ge_rect_t ge_rect_set_height(ge_rect_t rect, size_t height);
 ge_rect_t ge_rect_add(ge_rect_t rect, ge_coord_t coord);
 ge_rect_t ge_rect_sub(ge_rect_t rect, ge_coord_t coord);
+ge_rect_t ge_rect_mul(ge_rect_t rect, size_t scalar);
+ge_rect_t ge_rect_div(ge_rect_t rect, size_t scalar);
 ge_rect_t ge_rect_overlap(ge_rect_t rect, ge_rect_t other);
 ge_rect_t ge_rect_clamp_rect(ge_rect_t rect, ge_rect_t other);
 ge_coord_t ge_rect_clamp_coord(ge_rect_t rect, ge_coord_t coord);

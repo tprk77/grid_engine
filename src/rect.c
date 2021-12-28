@@ -81,6 +81,24 @@ ge_rect_t ge_rect_sub(ge_rect_t rect, ge_coord_t coord)
   };
 }
 
+ge_rect_t ge_rect_mul(ge_rect_t rect, size_t scalar)
+{
+  const ge_coord_t offset_coord = ge_coord_sub(rect.max_coord, rect.min_coord);
+  return (ge_rect_t){
+      rect.min_coord,
+      ge_coord_add(rect.min_coord, ge_coord_mul(offset_coord, scalar)),
+  };
+}
+
+ge_rect_t ge_rect_div(ge_rect_t rect, size_t scalar)
+{
+  const ge_coord_t offset_coord = ge_coord_sub(rect.max_coord, rect.min_coord);
+  return (ge_rect_t){
+      rect.min_coord,
+      ge_coord_add(rect.min_coord, ge_coord_div(offset_coord, scalar)),
+  };
+}
+
 ge_rect_t ge_rect_overlap(ge_rect_t rect, ge_rect_t other)
 {
   return (ge_rect_t){
