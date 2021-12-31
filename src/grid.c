@@ -170,6 +170,44 @@ void ge_grid_blit(ge_grid_t* grid, const ge_grid_t* blit_grid, ge_coord_t coord)
   }
 }
 
+void ge_grid_scale_blit(ge_grid_t* grid, const ge_grid_t* blit_grid, ge_coord_t coord,
+                        size_t pixel_multiplier)
+{
+  const ge_rect_t grid_rect = ge_grid_get_rect(grid);
+  const ge_rect_t shift_rect = ge_rect_add(ge_grid_get_rect(blit_grid), coord);
+  const ge_rect_t scaled_rect = ge_rect_mul(shift_rect, pixel_multiplier);
+  const ge_rect_t overlap_rect = ge_rect_overlap(grid_rect, scaled_rect);
+  const ge_rect_t scaled_blit_rect = ge_rect_sub(overlap_rect, coord);
+  const size_t scaled_blit_width = ge_rect_get_width(scaled_blit_rect);
+  const size_t scaled_blit_height = ge_rect_get_height(scaled_blit_rect);
+  const ge_coord_t blit_corner = {scaled_blit_rect.min_coord.x / pixel_multiplier,
+                                  scaled_blit_rect.min_coord.y / pixel_multiplier};
+  const ge_coord_t blit_subpx_offset = {scaled_blit_rect.min_coord.x % pixel_multiplier,
+                                        scaled_blit_rect.min_coord.y % pixel_multiplier};
+  // Loop over the scaled blit grid
+  const uint8_t* last_filed_row = NULL;
+  for (size_t jj = 0; jj < scaled_blit_height; ++jj) {
+    uint8_t* const dest_pixel_row =
+        (grid->pixel_arr + (grid->width * (jj + overlap_rect.min_coord.y))
+         + overlap_rect.min_coord.x);
+    if (jj == 0 || (jj + blit_subpx_offset.y) % pixel_multiplier == 0) {
+      // This is a new row of pixels from the blit grid
+      const size_t blit_y = ((jj + blit_subpx_offset.y) / pixel_multiplier) + blit_corner.y;
+      uint8_t* const src_pixel_row =
+          (blit_grid->pixel_arr + (blit_grid->width * blit_y) + blit_corner.x);
+      for (size_t ii = 0; ii < scaled_blit_width; ++ii) {
+        const size_t blit_x = (ii + blit_subpx_offset.x) / pixel_multiplier;
+        dest_pixel_row[ii] = src_pixel_row[blit_x];
+      }
+      last_filed_row = dest_pixel_row;
+    }
+    else {
+      // This is a repeat row of pixels, so do a copy instead
+      memcpy(dest_pixel_row, last_filed_row, scaled_blit_width);
+    }
+  }
+}
+
 static void abort_on_out_of_bounds(const ge_grid_t* grid, ge_coord_t coord)
 {
   if (!ge_grid_has_coord(grid, coord)) {
