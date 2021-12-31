@@ -39,6 +39,8 @@ ge_grid_t* ge_grid_copy_rect(const ge_grid_t* grid, ge_rect_t rect);
 void ge_grid_blit(ge_grid_t* grid, const ge_grid_t* blit_grid, ge_coord_t coord);
 void ge_grid_scale_blit(ge_grid_t* grid, const ge_grid_t* blit_grid, ge_coord_t coord,
                         size_t pixel_multiplier);
+void ge_grid_scale_blit_rect(ge_grid_t* grid, const ge_grid_t* blit_grid, ge_rect_t blit_rect,
+                             ge_coord_t coord, size_t pixel_multiplier);
 
 #ifdef __cplusplus
 }
