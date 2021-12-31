@@ -51,15 +51,8 @@ void ge_sc_view_free(ge_sc_view_t* view)
 
 void ge_sc_view_refresh(ge_sc_view_t* view)
 {
-  for (size_t jj = 0; jj < ge_grid_get_height(view->render_grid); ++jj) {
-    for (size_t ii = 0; ii < ge_grid_get_width(view->render_grid); ++ii) {
-      const ge_coord_t render_coord = {ii, jj};
-      const ge_coord_t source_coord =
-          ge_coord_add(view->sc_rect.min_coord, ge_coord_div(render_coord, view->pixel_multiplier));
-      const uint8_t value = ge_grid_get_coord(view->source_grid, source_coord);
-      ge_grid_set_coord(view->render_grid, render_coord, value);
-    }
-  }
+  ge_grid_scale_blit_rect(view->render_grid, view->source_grid, view->sc_rect, (ge_coord_t){0, 0},
+                          view->pixel_multiplier);
 }
 
 ge_grid_t* ge_sc_view_get_render_grid(ge_sc_view_t* view)
