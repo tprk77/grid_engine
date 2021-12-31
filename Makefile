@@ -60,7 +60,6 @@ LDFLAGS := -static-libgcc
 # -MP, and -MT options. As an explaination, -MM will generate dependencies, -MF
 # will set the output filename, -MP will generate empty rules for prerequisites
 # (which avoid issues with deleted files), and -MT set the target for the rule.
-#
 define make-depend
   $(CC) -MM -MF $3 -MP -MT $2 $(CFLAGS) $1
 endef
@@ -76,8 +75,8 @@ GE_BLD_DIR := build
 CFLAGS += -I $(GE_INC_DIR)
 
 GE_SRCS := $(wildcard $(GE_SRC_DIR)/*.c)
-GE_OBJS := $(patsubst $(GE_SRC_DIR)/%.c,$(GE_BLD_DIR)/%.o,$(GE_SRCS))
-GE_DEPS := $(patsubst $(GE_BLD_DIR)/%.o,$(GE_BLD_DIR)/%.d,$(GE_OBJS))
+GE_OBJS := $(patsubst $(GE_SRC_DIR)/%.c,$(GE_BLD_DIR)/tmp/%.o,$(GE_SRCS))
+GE_DEPS := $(patsubst $(GE_BLD_DIR)/tmp/%.o,$(GE_BLD_DIR)/tmp/%.d,$(GE_OBJS))
 
 # The library is either an .so or .dll. The import library is always a .dll.a,
 # but should only exist on a Windows build.
@@ -91,12 +90,13 @@ GE_OUT_IMPLIB := $(if $(GE_IMPLIB_GE),$(GE_WIN_OUT_IMPLIB),)
 
 SDL_LIBS := -lSDL2_image -lSDL2
 
+# Also create build/tmp directory which is used for objects, etc
 $(GE_BLD_DIR):
-> $(MKDIR) -p $@
+> $(MKDIR) -p $@/tmp
 
 # Note that this will always generate a dependency file (.d) alongside the
 # object file, so one will not exist without the other.
-$(GE_BLD_DIR)/%.o: $(GE_SRC_DIR)/%.c | $(GE_BLD_DIR)
+$(GE_BLD_DIR)/tmp/%.o: $(GE_SRC_DIR)/%.c | $(GE_BLD_DIR)
 > $(call make-depend,$<,$@,$(subst .o,.d,$@))
 > $(CC) $(CFLAGS) -c $< -o $@
 
@@ -119,72 +119,44 @@ all: $(GE_LIB_GE)
 
 GE_DEMO_DIR := demos
 
-GE_DCNW_SRCS := $(GE_DEMO_DIR)/demo_conway.c
-GE_DCNW_OBJS := $(patsubst $(GE_DEMO_DIR)/%.c,$(GE_BLD_DIR)/%.o,$(GE_DCNW_SRCS))
-GE_DCNW_DEPS := $(patsubst $(GE_BLD_DIR)/%.o,$(GE_BLD_DIR)/%.d,$(GE_DCNW_OBJS))
+GE_DEMO_SRCS := $(wildcard $(GE_DEMO_DIR)/demo_*.c)
+GE_DEMO_OBJS := $(patsubst $(GE_DEMO_DIR)/%.c,$(GE_BLD_DIR)/tmp/%.o,$(GE_DEMO_SRCS))
+GE_DEMO_DEPS := $(patsubst $(GE_BLD_DIR)/tmp/%.o,$(GE_BLD_DIR)/tmp/%.d,$(GE_DEMO_OBJS))
 
-GE_DEMO_CONWAY := $(GE_BLD_DIR)/demo_conway
+GE_DEMOS := $(patsubst $(GE_BLD_DIR)/tmp/%.o,$(GE_BLD_DIR)/%,$(GE_DEMO_OBJS))
 
-GE_DLNG_SRCS := $(GE_DEMO_DIR)/demo_langton.c
-GE_DLNG_OBJS := $(patsubst $(GE_DEMO_DIR)/%.c,$(GE_BLD_DIR)/%.o,$(GE_DLNG_SRCS))
-GE_DLNG_DEPS := $(patsubst $(GE_BLD_DIR)/%.o,$(GE_BLD_DIR)/%.d,$(GE_DLNG_OBJS))
-
-GE_DEMO_LANGTON := $(GE_BLD_DIR)/demo_langton
-
-GE_DPNG_SRCS := $(GE_DEMO_DIR)/demo_pong.c
-GE_DPNG_OBJS := $(patsubst $(GE_DEMO_DIR)/%.c,$(GE_BLD_DIR)/%.o,$(GE_DPNG_SRCS))
-GE_DPNG_DEPS := $(patsubst $(GE_BLD_DIR)/%.o,$(GE_BLD_DIR)/%.d,$(GE_DPNG_OBJS))
-
-GE_DEMO_PONG := $(GE_BLD_DIR)/demo_pong
-
-GE_DPLT_SRCS := $(GE_DEMO_DIR)/demo_palette.c
-GE_DPLT_OBJS := $(patsubst $(GE_DEMO_DIR)/%.c,$(GE_BLD_DIR)/%.o,$(GE_DPLT_SRCS))
-GE_DPLT_DEPS := $(patsubst $(GE_BLD_DIR)/%.o,$(GE_BLD_DIR)/%.d,$(GE_DPLT_OBJS))
-
-GE_DEMO_PALETTE := $(GE_BLD_DIR)/demo_palette
-
-GE_DMZE_SRCS := $(GE_DEMO_DIR)/demo_maze.c
-GE_DMZE_OBJS := $(patsubst $(GE_DEMO_DIR)/%.c,$(GE_BLD_DIR)/%.o,$(GE_DMZE_SRCS))
-GE_DMZE_DEPS := $(patsubst $(GE_BLD_DIR)/%.o,$(GE_BLD_DIR)/%.d,$(GE_DMZE_OBJS))
-
-GE_DEMO_MAZE := $(GE_BLD_DIR)/demo_maze
-
-# HACK Any DLLs we want to copy to the build directory
-GE_CP_DLL := $(if $(IS_WIN),$(GE_BLD_DIR)/SDL2.dll,)
-
-$(GE_BLD_DIR)/%.o: $(GE_DEMO_DIR)/%.c | $(GE_BLD_DIR)
+# This rule is slightly different then the above to match the demo sources
+$(GE_BLD_DIR)/tmp/demo_%.o: $(GE_DEMO_DIR)/demo_%.c | $(GE_BLD_DIR)
 > $(call make-depend,$<,$@,$(subst .o,.d,$@))
 > $(CC) $(CFLAGS) -c $< -o $@
 
-$(GE_DEMO_CONWAY): $(GE_DCNW_OBJS) $(GE_LIB_GE) $(SDL_LIBS) | $(GE_BLD_DIR) $(GE_CP_DLL)
-> $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
-
-$(GE_DEMO_LANGTON): $(GE_DLNG_OBJS) $(GE_LIB_GE) $(SDL_LIBS) | $(GE_BLD_DIR) $(GE_CP_DLL)
-> $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
-
-$(GE_DEMO_PONG): $(GE_DPNG_OBJS) $(GE_LIB_GE) $(SDL_LIBS) | $(GE_BLD_DIR) $(GE_CP_DLL)
-> $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
-
-$(GE_DEMO_PALETTE): $(GE_DPLT_OBJS) $(GE_LIB_GE) $(SDL_LIBS) | $(GE_BLD_DIR) $(GE_CP_DLL)
-> $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
-
-$(GE_DEMO_MAZE): $(GE_DMZE_OBJS) $(GE_LIB_GE) $(SDL_LIBS) | $(GE_BLD_DIR) $(GE_CP_DLL)
-> $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
+# HACK Any DLLs we want to copy to the build directory
+GE_CP_DLL := $(if $(IS_WIN),$(GE_BLD_DIR)/SDL2.dll,)
 
 # Copy DLLs on Windows, using VPATH to locate them
 $(GE_BLD_DIR)/%.dll: %.dll | $(GE_BLD_DIR)
 > $(CP) $< $@
 
+# Usage: $(call get-demo-target-for-eval,demo)
+#
+# This will result in a rule to build a demo executable which must then be
+# evaluated. Note that $$(...) will expand to $(...), which can then expanded in
+# the final eval when the rule is instantiated.
+define get-demo-target-for-eval
+$1: $$(patsubst $$(GE_BLD_DIR)/demo_%,$$(GE_BLD_DIR)/tmp/demo_%.o,$1) \
+        $$(GE_LIB_GE) | $$(GE_BLD_DIR) $$(GE_CP_DLL)
+> $$(CC) $$(CFLAGS) $$(LDFLAGS) $$^ -o $$@
+endef
+
+# For each demo target, instantiate the rule by evaluating it
+$(foreach demo,$(GE_DEMOS),$(eval $(call get-demo-target-for-eval,$(demo))))
+
 ifneq ($(MAKECMDGOALS), clean)
-  -include $(GE_DCNW_DEPS)
-  -include $(GE_DLNG_DEPS)
-  -include $(GE_DPNG_DEPS)
-  -include $(GE_DPLT_DEPS)
-  -include $(GE_DMZE_DEPS)
+  -include $(GE_DEMO_DEPS)
 endif
 
 .PHONY: demos
-demos: $(GE_DEMO_CONWAY) $(GE_DEMO_LANGTON) $(GE_DEMO_PONG) $(GE_DEMO_PALETTE) $(GE_DEMO_MAZE)
+demos: $(GE_DEMOS)
 
 #########
 # OTHER #
