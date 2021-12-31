@@ -16,6 +16,9 @@ typedef struct ge_grid {
   uint8_t* pixel_arr;
 } ge_grid_t;
 
+static void ge_grid_scale_blit_rect_impl(ge_grid_t* grid, const ge_grid_t* blit_grid,
+                                         ge_rect_t blit_rect, ge_coord_t coord,
+                                         size_t pixel_multiplier);
 static void abort_on_coord_out_of_bounds(const ge_grid_t* grid, ge_coord_t coord);
 static void abort_on_rect_out_of_bounds(const ge_grid_t* grid, ge_rect_t rect);
 
@@ -170,15 +173,31 @@ void ge_grid_blit(ge_grid_t* grid, const ge_grid_t* blit_grid, ge_coord_t coord)
 void ge_grid_scale_blit(ge_grid_t* grid, const ge_grid_t* blit_grid, ge_coord_t coord,
                         size_t pixel_multiplier)
 {
+  ge_grid_scale_blit_rect_impl(grid, blit_grid, ge_grid_get_rect(blit_grid), coord,
+                               pixel_multiplier);
+}
+
+void ge_grid_scale_blit_rect(ge_grid_t* grid, const ge_grid_t* blit_grid, ge_rect_t blit_rect,
+                             ge_coord_t coord, size_t pixel_multiplier)
+{
+  abort_on_rect_out_of_bounds(blit_grid, blit_rect);
+  ge_grid_scale_blit_rect_impl(grid, blit_grid, blit_rect, coord, pixel_multiplier);
+}
+
+static void ge_grid_scale_blit_rect_impl(ge_grid_t* grid, const ge_grid_t* blit_grid,
+                                         ge_rect_t blit_rect, ge_coord_t coord,
+                                         size_t pixel_multiplier)
+{
   const ge_rect_t grid_rect = ge_grid_get_rect(grid);
-  const ge_rect_t shift_rect = ge_rect_add(ge_grid_get_rect(blit_grid), coord);
+  const ge_rect_t shift_rect = ge_rect_add(ge_rect_sub(blit_rect, blit_rect.min_coord), coord);
   const ge_rect_t scaled_rect = ge_rect_mul(shift_rect, pixel_multiplier);
   const ge_rect_t overlap_rect = ge_rect_overlap(grid_rect, scaled_rect);
   const ge_rect_t scaled_blit_rect = ge_rect_sub(overlap_rect, coord);
   const size_t scaled_blit_width = ge_rect_get_width(scaled_blit_rect);
   const size_t scaled_blit_height = ge_rect_get_height(scaled_blit_rect);
-  const ge_coord_t blit_corner = {scaled_blit_rect.min_coord.x / pixel_multiplier,
+  const ge_coord_t blit_offset = {scaled_blit_rect.min_coord.x / pixel_multiplier,
                                   scaled_blit_rect.min_coord.y / pixel_multiplier};
+  const ge_coord_t blit_corner = ge_coord_add(blit_offset, blit_rect.min_coord);
   const ge_coord_t blit_subpx_offset = {scaled_blit_rect.min_coord.x % pixel_multiplier,
                                         scaled_blit_rect.min_coord.y % pixel_multiplier};
   // Loop over the scaled blit grid
