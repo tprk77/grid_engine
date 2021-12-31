@@ -16,7 +16,8 @@ typedef struct ge_grid {
   uint8_t* pixel_arr;
 } ge_grid_t;
 
-static void abort_on_out_of_bounds(const ge_grid_t* grid, ge_coord_t coord);
+static void abort_on_coord_out_of_bounds(const ge_grid_t* grid, ge_coord_t coord);
+static void abort_on_rect_out_of_bounds(const ge_grid_t* grid, ge_rect_t rect);
 
 ge_grid_t* ge_grid_create(size_t width, size_t height)
 {
@@ -96,13 +97,13 @@ bool ge_grid_has_coord(const ge_grid_t* grid, ge_coord_t coord)
 
 uint8_t ge_grid_get_coord(const ge_grid_t* grid, ge_coord_t coord)
 {
-  abort_on_out_of_bounds(grid, coord);
+  abort_on_coord_out_of_bounds(grid, coord);
   return grid->pixel_arr[grid->width * coord.y + coord.x];
 }
 
 void ge_grid_set_coord(ge_grid_t* grid, ge_coord_t coord, uint8_t value)
 {
-  abort_on_out_of_bounds(grid, coord);
+  abort_on_coord_out_of_bounds(grid, coord);
   grid->pixel_arr[grid->width * coord.y + coord.x] = value;
 }
 
@@ -120,24 +121,20 @@ void ge_grid_set_coord_wrapped(ge_grid_t* grid, ge_coord_t coord, uint8_t value)
 
 ge_nbrs_t ge_grid_get_nbrs(const ge_grid_t* grid, ge_coord_t coord)
 {
-  abort_on_out_of_bounds(grid, coord);
+  abort_on_coord_out_of_bounds(grid, coord);
   return ge_nbrs_from_coord_inside(coord, grid->width, grid->height);
 }
 
 ge_nbrs_t ge_grid_get_nbrs_wrapped(const ge_grid_t* grid, ge_coord_t coord)
 {
-  abort_on_out_of_bounds(grid, coord);
+  abort_on_coord_out_of_bounds(grid, coord);
   return ge_nbrs_from_coord_wrapped(coord, grid->width, grid->height);
 }
 
 ge_grid_t* ge_grid_copy_rect(const ge_grid_t* grid, ge_rect_t rect)
 {
-  // Check that the rect is actually within the grid
-  const ge_rect_t grid_rect = ge_grid_get_rect(grid);
-  if (!ge_rect_within_rect(grid_rect, rect)) {
-    return NULL;
-  }
   // Create the grid and copy data
+  abort_on_rect_out_of_bounds(grid, rect);
   const size_t width = ge_rect_get_width(rect);
   const size_t height = ge_rect_get_height(rect);
   ge_grid_t* const copy_grid = ge_grid_create(width, height);
@@ -208,10 +205,20 @@ void ge_grid_scale_blit(ge_grid_t* grid, const ge_grid_t* blit_grid, ge_coord_t 
   }
 }
 
-static void abort_on_out_of_bounds(const ge_grid_t* grid, ge_coord_t coord)
+static void abort_on_coord_out_of_bounds(const ge_grid_t* grid, ge_coord_t coord)
 {
   if (!ge_grid_has_coord(grid, coord)) {
     GE_LOG_ERROR("Coord is out of bounds! (%li, %li)", coord.x, coord.y);
+    abort();
+  }
+}
+
+static void abort_on_rect_out_of_bounds(const ge_grid_t* grid, ge_rect_t rect)
+{
+  const ge_rect_t grid_rect = ge_grid_get_rect(grid);
+  if (!ge_rect_within_rect(grid_rect, rect)) {
+    GE_LOG_ERROR("Rect is out of bounds! [(%li, %li), (%li, %li)]", rect.min_coord.x,
+                 rect.min_coord.y, rect.max_coord.x, rect.max_coord.y);
     abort();
   }
 }
