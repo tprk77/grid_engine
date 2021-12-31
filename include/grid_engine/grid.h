@@ -37,6 +37,8 @@ ge_nbrs_t ge_grid_get_nbrs(const ge_grid_t* grid, ge_coord_t coord);
 ge_nbrs_t ge_grid_get_nbrs_wrapped(const ge_grid_t* grid, ge_coord_t coord);
 ge_grid_t* ge_grid_copy_rect(const ge_grid_t* grid, ge_rect_t rect);
 void ge_grid_blit(ge_grid_t* grid, const ge_grid_t* blit_grid, ge_coord_t coord);
+void ge_grid_scale_blit(ge_grid_t* grid, const ge_grid_t* blit_grid, ge_coord_t coord,
+                        size_t pixel_multiplier);
 
 #ifdef __cplusplus
 }
