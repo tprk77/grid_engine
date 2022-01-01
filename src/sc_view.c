@@ -73,6 +73,20 @@ ge_grid_t* ge_sc_view_resize(ge_sc_view_t* view, size_t width, size_t height)
   return view->render_grid;
 }
 
+double ge_sc_view_get_max_x_abs_scroll(const ge_sc_view_t* view)
+{
+  const size_t subpx_width = ge_grid_get_width(view->source_grid) * view->pixel_multiplier;
+  const size_t subpx_max_x = subpx_width - ge_grid_get_width(view->render_grid);
+  return (double) subpx_max_x / view->pixel_multiplier;
+}
+
+double ge_sc_view_get_max_y_abs_scroll(const ge_sc_view_t* view)
+{
+  const size_t subpx_height = ge_grid_get_height(view->source_grid) * view->pixel_multiplier;
+  const size_t subpx_max_y = subpx_height - ge_grid_get_height(view->render_grid);
+  return (double) subpx_max_y / view->pixel_multiplier;
+}
+
 void ge_sc_view_scroll_to_x_abs(ge_sc_view_t* view, double x)
 {
   // IEEE 754 doubles can exactly represent up to 52-bit integers

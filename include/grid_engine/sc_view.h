@@ -56,6 +56,26 @@ ge_grid_t* ge_sc_view_get_render_grid(ge_sc_view_t* view);
 ge_grid_t* ge_sc_view_resize(ge_sc_view_t* view, size_t width, size_t height);
 
 /**
+ * Get the maximum absolute X position available to scroll. This is basically
+ * the width of the original grid minus the size of the scroll view. It may be a
+ * fractional value to indicate subpixels. (The minimum value is always zero.)
+ *
+ * @param view The scroll view.
+ * @return The maximum absolute X position.
+ */
+double ge_sc_view_get_max_x_abs_scroll(const ge_sc_view_t* view);
+
+/**
+ * Get the maximum absolute Y position available to scroll. This is basically
+ * the height of the original grid minus the size of the scroll view. It may be a
+ * fractional value to indicate subpixels. (The minimum value is always zero.)
+ *
+ * @param view The scroll view.
+ * @return The maximum absolute Y position.
+ */
+double ge_sc_view_get_max_y_abs_scroll(const ge_sc_view_t* view);
+
+/**
  * Scroll the view to an absolute X position.
  *
  * @param view The scroll view.
