@@ -16,11 +16,14 @@ typedef struct user_data {
   double scroll_y;  // percent
 } user_data_t;
 
-void scroll_loop_func(ge_grid_t* grid, void* user_data_, uint32_t time_ms)
+void scroll_loop_func(ge_grid_t* render_grid, void* user_data_, uint32_t time_ms)
 {
-  (void) grid;
+  (void) render_grid;
   // Cast the user data back to the right type
   user_data_t* user_data = (user_data_t*) user_data_;
+  // Get the max scroll values
+  const double max_scroll_x = ge_sc_view_get_max_x_abs_scroll(user_data->view);
+  const double max_scroll_y = ge_sc_view_get_max_y_abs_scroll(user_data->view);
   // Get the change in time since last time
   const uint32_t dt_ms = time_ms - user_data->last_update_time_ms;
   const double dt_s = dt_ms / 1000.0;
@@ -32,7 +35,7 @@ void scroll_loop_func(ge_grid_t* grid, void* user_data_, uint32_t time_ms)
   }
   else if (user_data->scroll_dir == GE_DIR_SOUTH) {
     user_data->scroll_y += user_data->scroll_speed * dt_s;
-    user_data->scroll_y = user_data->scroll_y < 100.0 ? user_data->scroll_y : 100.0;
+    user_data->scroll_y = user_data->scroll_y < max_scroll_y ? user_data->scroll_y : max_scroll_y;
   }
   else if (user_data->scroll_dir == GE_DIR_WEST) {
     user_data->scroll_x -= user_data->scroll_speed * dt_s;
@@ -40,17 +43,18 @@ void scroll_loop_func(ge_grid_t* grid, void* user_data_, uint32_t time_ms)
   }
   else if (user_data->scroll_dir == GE_DIR_EAST) {
     user_data->scroll_x += user_data->scroll_speed * dt_s;
-    user_data->scroll_x = user_data->scroll_x < 100.0 ? user_data->scroll_x : 100.0;
+    user_data->scroll_x = user_data->scroll_x < max_scroll_x ? user_data->scroll_x : max_scroll_x;
   }
   // Update the view
-  ge_sc_view_scroll_to_x_pcnt(user_data->view, user_data->scroll_x);
-  ge_sc_view_scroll_to_y_pcnt(user_data->view, user_data->scroll_y);
+  ge_sc_view_scroll_to_x_abs(user_data->view, user_data->scroll_x);
+  ge_sc_view_scroll_to_y_abs(user_data->view, user_data->scroll_y);
   ge_sc_view_refresh(user_data->view);
 }
 
-void scroll_event_func(ge_grid_t* grid, void* user_data_, uint32_t time_ms, const ge_event_t* event)
+void scroll_event_func(ge_grid_t* render_grid, void* user_data_, uint32_t time_ms,
+                       const ge_event_t* event)
 {
-  (void) grid;
+  (void) render_grid;
   (void) time_ms;
   // Cast the user data back to the right type
   user_data_t* user_data = (user_data_t*) user_data_;
@@ -96,14 +100,13 @@ int main(void)
   ge_grid_t* grid = ge_img_load("demos/assets/grid_engine.png");
   // Set up and refresh the view
   ge_sc_view_t* view = ge_sc_view_create(200, 200, 4, grid);
-  ge_sc_view_refresh(view);
   // User data to track state, etc
   user_data_t user_data = {
       .view = view,
       .scroll_speed = 10.0,
       .scroll_dir = GE_DIR_NONE,
-      .scroll_x = 0.0,
-      .scroll_y = 0.0,
+      .scroll_x = ge_sc_view_get_max_x_abs_scroll(view) / 2.0,
+      .scroll_y = ge_sc_view_get_max_y_abs_scroll(view) / 2.0,
   };
   // The EZ loop data
   ez_loop_data_t ez_loop_data = {
